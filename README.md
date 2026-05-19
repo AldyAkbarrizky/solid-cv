@@ -19,7 +19,7 @@ Aplikasi ini juga sudah memiliki login Google, riwayat review, quota usage, pake
 - Better Auth (Google login)
 - Groq API (via OpenAI SDK)
 - Duitku payment gateway
-- Neon serverless driver
+- Neon serverless driver (WebSocket, mendukung transaksi)
 - Next Image remote config untuk avatar Google
 
 ## Menjalankan Project
@@ -80,6 +80,16 @@ npm run db:migrate   # run migration
 npm run db:studio    # buka Drizzle Studio
 ```
 
+> **Catatan build lokal:** `npm run build` berjalan dengan mode production dan akan menolak
+> `APP_URL` yang masih pakai `localhost`. Untuk test build di lokal, override sementara:
+>
+> ```bash
+> APP_URL=https://cv.solidtechno.com \
+> BETTER_AUTH_URL=https://cv.solidtechno.com \
+> NEXT_PUBLIC_BETTER_AUTH_URL=https://cv.solidtechno.com \
+> npm run build
+> ```
+
 ## Dokumentasi Developer
 
 Dokumentasi teknis ada di folder `docs/`:
@@ -94,7 +104,7 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 ## Fitur Utama
 
 - Upload CV PDF/DOCX dengan validasi ukuran, MIME, dan magic bytes.
-- Ekstraksi teks CV dengan `pdf-parse` dan `mammoth`.
+- Ekstraksi teks CV dengan `pdf-parse@1.x` (custom renderer untuk spasi akurat) dan `mammoth`.
 - Masking PII dasar sebelum teks dikirim ke AI.
 - Review CV berbasis Groq dengan output JSON tervalidasi Zod.
 - Riwayat review untuk user login.

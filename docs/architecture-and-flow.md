@@ -9,6 +9,7 @@
 - Groq API (via SDK `openai`)
 - Duitku untuk pembayaran paket berbayar
 - Tailwind CSS 4 + komponen UI lokal
+- Neon serverless driver (`neon-serverless`) — mendukung transaksi DB
 
 ## Struktur direktori yang penting
 
@@ -22,7 +23,7 @@
 - `src/lib/ai`: prompt, schema hasil AI, dan client AI
 - `src/lib/billing`: plan, invoice Duitku, dan sinkronisasi status pembayaran
 - `src/lib/billing/pricing-display.ts`: data tampilan paket untuk home dan pricing
-- `src/lib/cv`: ekstraksi teks CV + masking PII
+- `src/lib/cv`: ekstraksi teks CV (`pdf-parse@1.x` + custom renderer) + masking PII
 - `src/lib/security`: rate-limit + identity hashing
 - `src/lib/quota`: logika kuota guest/user dan entitlement paket
 - `src/lib/admin.ts`: pengecekan admin berdasarkan `ADMIN_EMAILS`
@@ -39,7 +40,7 @@
    - validasi input (`zod`)
    - validasi file (ekstensi + MIME + magic bytes)
 4. File diekstrak ke teks:
-   - PDF: `pdf-parse`
+   - PDF: `pdf-parse@1.x` dengan custom `renderPdfPage` untuk rekonstruksi spasi antar kata
    - DOCX: `mammoth`
 5. Teks CV di-mask (`maskPII`) sebelum dikirim ke AI.
 6. AI menghasilkan JSON review sesuai schema (`CVReviewResultSchema`).
