@@ -1,0 +1,1 @@
+ALTER TABLE "cv_reviews" ADD COLUMN "expires_at" timestamp;
