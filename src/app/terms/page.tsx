@@ -77,12 +77,16 @@ const termsSections = [
           <li>Mengunggah CV atau data pribadi orang lain tanpa izin.</li>
           <li>Mengunggah file berbahaya, malware, atau file manipulatif.</li>
           <li>Mencoba membobol, mengganggu, atau menyalahgunakan sistem.</li>
-          <li>Mencoba mengeksploitasi API, payment flow, kuota, atau rate limit.</li>
+          <li>
+            Mencoba mengeksploitasi API, payment flow, kuota, atau rate limit.
+          </li>
           <li>
             Menggunakan layanan untuk aktivitas ilegal, penipuan, atau
             pelanggaran hukum.
           </li>
-          <li>Menyalin, menjual ulang, atau mengeksploitasi layanan tanpa izin.</li>
+          <li>
+            Menyalin, menjual ulang, atau mengeksploitasi layanan tanpa izin.
+          </li>
         </ul>
       </>
     ),
@@ -149,16 +153,18 @@ const termsSections = [
     content: (
       <>
         <p>
-          Solid CV dapat menyediakan mode guest, free user, beta tester, dan
-          paid user. Setiap status akun dapat memiliki batas kuota review yang
-          berbeda.
+          Solid CV menyediakan empat status akun dengan kuota yang berbeda:
+          Guest 1 review / 24 jam, Free (login) 15 review / bulan, Paid Basic 60
+          review / 30 hari, dan Paid Pro 180 review / 30 hari.
         </p>
         <p>
           Kuota dihitung berdasarkan review yang berhasil dibuat. Kegagalan
           upload, file invalid, atau kegagalan sistem tertentu tidak selalu
           dihitung sebagai penggunaan kuota.
         </p>
-        <p>Penghapusan hasil review tidak mengembalikan kuota yang digunakan.</p>
+        <p>
+          Penghapusan hasil review tidak mengembalikan kuota yang digunakan.
+        </p>
       </>
     ),
   },

@@ -99,6 +99,7 @@ Dokumentasi teknis ada di folder `docs/`:
 - `docs/architecture-and-flow.md`
 - `docs/billing-and-admin.md`
 - `docs/security-privacy-ops.md`
+- `docs/admin-sop.md`
 
 Mulai dari `docs/README.md` untuk urutan bacanya.
 
@@ -115,7 +116,9 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 - Halaman pricing dengan status paket/kuota akun dan tabel perbandingan paket.
 - CTA upgrade paket tersedia di header, halaman review, dan halaman riwayat.
 - Checkout Duitku, callback validation, dan activation entitlement.
+- Halaman return pembayaran dengan status real-time (paid/pending/failed) + auto-refresh.
 - Admin dashboard untuk melihat payment order, entitlement, usage, review, dan audit log.
+- Cleanup job otomatis (Vercel Cron) untuk hapus review dan rate-limit data yang expired.
 - Privacy Policy, Terms of Service, Contact, robots, dan sitemap.
 
 ## Catatan Penting

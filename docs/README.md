@@ -8,6 +8,7 @@ Urutan baca yang disarankan:
 2. [Arsitektur & Alur Data](./architecture-and-flow.md)
 3. [Billing & Admin](./billing-and-admin.md)
 4. [Security, Privacy, dan Operasional](./security-privacy-ops.md)
+5. [Admin SOP](./admin-sop.md) — prosedur operasional: tambah admin, cek order, rekonsiliasi, rollback
 
 Kalau butuh konteks cepat:
 
@@ -22,3 +23,5 @@ Kalau butuh konteks cepat:
 - Admin dashboard: `src/app/admin/page.tsx`
 - Model data: `src/db/schema.ts`
 - Validasi env production: `src/lib/config/env.ts`
+- Cleanup cron job: `src/app/api/cleanup/expired-reviews/route.ts`
+- Konfigurasi Vercel cron: `vercel.json`

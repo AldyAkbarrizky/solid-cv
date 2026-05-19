@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cleanup/expired-reviews",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

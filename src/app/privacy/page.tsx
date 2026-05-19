@@ -37,15 +37,21 @@ const privacySections = [
     title: "Data yang kami proses",
     content: (
       <>
-        <p>Bergantung pada cara Anda menggunakan layanan, kami dapat memproses:</p>
+        <p>
+          Bergantung pada cara Anda menggunakan layanan, kami dapat memproses:
+        </p>
         <ul>
           <li>Data akun, seperti nama dan email dari login Google.</li>
           <li>File CV yang Anda unggah untuk dianalisis secara sementara.</li>
-          <li>Teks hasil ekstraksi dari CV untuk dikirim ke sistem analisis.</li>
-          <li>Posisi tujuan, catatan tambahan, dan preferensi yang Anda isi.</li>
           <li>
-            Hasil analisis CV, seperti skor, ringkasan, rekomendasi, dan
-            riwayat review.
+            Teks hasil ekstraksi dari CV untuk dikirim ke sistem analisis.
+          </li>
+          <li>
+            Posisi tujuan, catatan tambahan, dan preferensi yang Anda isi.
+          </li>
+          <li>
+            Hasil analisis CV, seperti skor, ringkasan, rekomendasi, dan riwayat
+            review.
           </li>
           <li>
             Data penggunaan, seperti kuota review, riwayat pemakaian, waktu
@@ -131,15 +137,14 @@ const privacySections = [
     content: (
       <>
         <p>
-          Hasil review CV dapat disimpan sementara agar pengguna dapat membuka
-          kembali hasil analisis. Retensi default dapat dibatasi sesuai
-          konfigurasi sistem, misalnya 7 hari untuk hasil review sementara atau
-          sesuai kebutuhan paket pengguna.
+          Hasil review CV disimpan selama 30 hari secara default agar pengguna
+          dapat membuka kembali hasil analisis. Periode ini dapat berbeda sesuai
+          konfigurasi sistem. Pengguna dapat menghapus hasil review lebih awal
+          melalui tombol hapus yang tersedia di aplikasi.
         </p>
         <p>
-          Pengguna dapat menghapus hasil review melalui fitur yang tersedia di
-          aplikasi. Penghapusan hasil review tidak selalu mengembalikan kuota
-          yang sudah digunakan.
+          Penghapusan hasil review tidak selalu mengembalikan kuota yang sudah
+          digunakan.
         </p>
       </>
     ),
@@ -176,8 +181,8 @@ const privacySections = [
         </p>
         <p>
           Meskipun demikian, tidak ada sistem yang sepenuhnya bebas risiko.
-          Pengguna tetap perlu berhati-hati dan hanya mengunggah CV yang
-          relevan untuk dianalisis.
+          Pengguna tetap perlu berhati-hati dan hanya mengunggah CV yang relevan
+          untuk dianalisis.
         </p>
       </>
     ),
@@ -212,8 +217,8 @@ const privacySections = [
         <p>
           Untuk review yang terhubung ke akun, akses dan penghapusan hanya dapat
           dilakukan oleh pemilik akun. Untuk mode guest, siapa pun yang memiliki
-          URL hasil review dapat membuka hasil selama belum kedaluwarsa, sehingga
-          pengguna wajib menjaga URL tersebut.
+          URL hasil review dapat membuka hasil selama belum kedaluwarsa,
+          sehingga pengguna wajib menjaga URL tersebut.
         </p>
         <p>
           Pengguna dapat meminta penghapusan akun dengan menghubungi email
@@ -245,9 +250,9 @@ const privacySections = [
           <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.
         </p>
         <p>
-          Anda juga dapat membuka halaman{" "}
-          <Link href="/contact">Kontak</Link> untuk melihat informasi bantuan
-          dan jenis permintaan yang dapat diajukan.
+          Anda juga dapat membuka halaman <Link href="/contact">Kontak</Link>{" "}
+          untuk melihat informasi bantuan dan jenis permintaan yang dapat
+          diajukan.
         </p>
       </>
     ),
@@ -265,6 +270,7 @@ export default function PrivacyPage() {
         "File CV tidak disimpan sebagai dokumen permanen.",
         "Teks CV dapat dikirim ke penyedia AI setelah proses masking dasar.",
         "Data akun, riwayat, kuota, dan pembayaran dipakai untuk menjalankan layanan.",
+        "Hasil review disimpan sementara (default 30 hari) dan dapat dihapus kapan saja.",
         "Pengguna dapat menghapus review dan meminta penghapusan akun.",
       ]}
       sections={privacySections}

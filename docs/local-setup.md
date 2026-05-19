@@ -53,6 +53,10 @@ NEXT_PUBLIC_COMPANY_NAME=SolidTechno ID
 # Isi kalau mau error dikirim ke Sentry. Kalau kosong, Sentry tidak aktif.
 SENTRY_DSN=
 NEXT_PUBLIC_SENTRY_DSN=
+
+# Untuk Vercel Cron Job cleanup data expired
+# Vercel auto-generate ini, atau bisa diisi manual untuk test lokal
+CRON_SECRET=
 ```
 
 Catatan:

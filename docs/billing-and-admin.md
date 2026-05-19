@@ -121,13 +121,18 @@ Route `/billing` masih ada, tetapi hanya redirect ke `/pricing` supaya link lama
 
 Route: `/billing/return`
 
-Halaman ini hanya memberi status bahwa pembayaran sedang diverifikasi.
+Halaman ini menampilkan status pembayaran secara real-time berdasarkan status order di DB.
+
+Status yang ditampilkan:
+- `paid` — hijau, kuota sudah aktif
+- `pending` — kuning, menunggu callback Duitku (auto-refresh tiap 6 detik, maks 8 kali)
+- `failed` / `cancelled` — merah, instruksi untuk coba ulang
+- tidak ada order — fallback info
 
 Penting:
-
 - halaman return bukan bukti pembayaran final
 - aktivasi paket tetap bergantung pada callback Duitku yang valid
-- kalau callback lambat, user bisa melihat status internal order dari halaman ini
+- kalau callback lambat, user bisa klik "Cek Status" untuk refresh manual
 
 ## Admin
 
@@ -166,9 +171,28 @@ Data yang dicatat:
 - metadata
 - timestamp
 
+## Cleanup job
+
+Endpoint: `POST /api/cleanup/expired-reviews`
+
+Dijalankan otomatis tiap hari jam 03:00 UTC via Vercel Cron (lihat `vercel.json`).
+
+Apa yang dibersihkan:
+- `cv_reviews` di mana `expires_at < now()` (default 30 hari)
+- `review_attempts` yang lebih dari 48 jam (data rate-limit)
+
+Bisa juga dijalankan manual:
+```bash
+curl -X POST https://cv.solidtechno.com/api/cleanup/expired-reviews \
+  -H "Authorization: Bearer <CRON_SECRET>"
+```
+
+Pastikan `CRON_SECRET` diisi di env variable. Tanpa itu, endpoint selalu return 401.
+
 ## Catatan untuk production
 
 - Pastikan `DUITKU_ENV=production` hanya dipakai setelah callback URL, return URL, dan signature sudah dites.
 - Jangan expose `DUITKU_API_KEY` ke public env.
 - Admin route memakai `notFound()` untuk user non-admin supaya tidak terlalu eksplisit.
 - Untuk rekonsiliasi pembayaran, gunakan admin detail page dan tombol `Check Duitku`.
+- Prosedur operasional lengkap (tambah admin, aktivasi manual, rollback) ada di `docs/admin-sop.md`.
