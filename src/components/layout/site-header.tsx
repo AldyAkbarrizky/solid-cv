@@ -5,6 +5,7 @@ import { ArrowLeft, History, LogIn, Sparkles } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { CreditCard } from "lucide-react";
 
 type SiteHeaderProps = {
   variant?: "home" | "app";
@@ -106,6 +107,18 @@ export async function SiteHeader({
                 <Link href="/review">
                   <Sparkles className="mr-1.5 h-4 w-4" />
                   Review CV
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="hidden bg-white md:inline-flex"
+              >
+                <Link href="/pricing">
+                  <CreditCard className="mr-1.5 h-4 w-4" />
+                  Paket
                 </Link>
               </Button>
 

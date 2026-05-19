@@ -100,4 +100,40 @@ export const reviewUsageEvents = pgTable(
   ],
 );
 
+export const paymentOrders = pgTable(
+  "payment_orders",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    userId: text("user_id").notNull(),
+
+    planCode: varchar("plan_code", { length: 40 }).notNull(),
+
+    merchantOrderId: varchar("merchant_order_id", { length: 50 })
+      .notNull()
+      .unique(),
+
+    duitkuReference: varchar("duitku_reference", { length: 120 }),
+    paymentUrl: text("payment_url"),
+
+    amount: integer("amount").notNull(),
+    reviewQuotaLimit: integer("review_quota_limit").notNull(),
+
+    status: varchar("status", { length: 30 }).notNull().default("pending"),
+    paymentCode: varchar("payment_code", { length: 50 }),
+    resultCode: varchar("result_code", { length: 10 }),
+
+    paidAt: timestamp("paid_at"),
+    expiredAt: timestamp("expired_at"),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("payment_orders_user_id_idx").on(table.userId),
+    index("payment_orders_status_idx").on(table.status),
+    index("payment_orders_merchant_order_id_idx").on(table.merchantOrderId),
+  ],
+);
+
 export * from "./auth-schema";

@@ -43,6 +43,13 @@
       "when": 1779089011770,
       "tag": "0005_sweet_ikaris",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779166539712,
+      "tag": "0006_cheerful_mentallo",
+      "breakpoints": true
     }
   ]
 }
