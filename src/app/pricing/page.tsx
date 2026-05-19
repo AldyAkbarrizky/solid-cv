@@ -3,11 +3,16 @@ import { billingPlans } from "@/lib/billing/plans";
 import { getCurrentUser } from "@/lib/session";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckoutButton } from "./checkout-button";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Paket Berbayar - Solid CV",
   description:
     "Pilih paket review CV berbayar untuk menambah kuota penggunaan.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function PricingPage() {

@@ -12,6 +12,7 @@ import { isReviewExpired } from "@/lib/review/retention";
 import { DeleteReviewButton } from "./delete-review-button";
 import { getCurrentUser } from "@/lib/session";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Metadata } from "next";
 
 type ReviewResultPageProps = {
   params: Promise<{
@@ -450,3 +451,10 @@ export default async function ReviewResultPage({
     </main>
   );
 }
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};

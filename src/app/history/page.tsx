@@ -12,6 +12,10 @@ import { SiteHeader } from "@/components/layout/site-header";
 export const metadata: Metadata = {
   title: "Riwayat Review - Solid CV",
   description: "Lihat riwayat hasil review CV yang tersimpan di akun Anda.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function HistoryPage() {

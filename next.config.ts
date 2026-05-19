@@ -6,17 +6,17 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https:",
   "font-src 'self'",
-  "connect-src 'self'",
+  "connect-src 'self' https://api.groq.com https://api.deepseek.com https://api-sandbox.duitku.com https://api-prod.duitku.com https://sandbox.duitku.com https://passport.duitku.com",
   "object-src 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  "form-action 'self' https://*.duitku.com https://duitku.com",
   "frame-ancestors 'none'",
+  "upgrade-insecure-requests",
 ].join("; ");
 
 const nextConfig: NextConfig = {
-  reactCompiler: true,
   poweredByHeader: false,
 
   async headers() {
@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), payment=()",
+            value: "camera=(), microphone=(), geolocation=()",
           },
           {
             key: "Cross-Origin-Opener-Policy",

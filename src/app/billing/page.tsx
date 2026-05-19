@@ -7,6 +7,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/db";
 import { userEntitlements } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function BillingPage() {
   const user = await getCurrentUser();
