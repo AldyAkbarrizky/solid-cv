@@ -8,7 +8,7 @@ Solid CV adalah aplikasi review CV berbasis AI untuk membantu pencari kerja meni
 - keterbacaan ATS
 - rekomendasi perbaikan dan keyword yang bisa dipertimbangkan
 
-Aplikasi ini juga sudah memiliki login Google, riwayat review, quota usage, paket berbayar via Duitku, halaman billing, admin lite, dan halaman legal dasar.
+Aplikasi ini juga sudah memiliki login Google, riwayat review, quota usage, paket berbayar via Duitku, status paket/kuota di halaman pricing, admin lite, dan halaman legal dasar.
 
 ## Tech Stack
 
@@ -20,6 +20,7 @@ Aplikasi ini juga sudah memiliki login Google, riwayat review, quota usage, pake
 - Groq API (via OpenAI SDK)
 - Duitku payment gateway
 - Neon serverless driver
+- Next Image remote config untuk avatar Google
 
 ## Menjalankan Project
 
@@ -99,6 +100,7 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 - Riwayat review untuk user login.
 - Guest mode dengan kuota terbatas.
 - Paket berbayar `paid_basic` dan `paid_pro`.
+- Halaman pricing dengan status paket/kuota akun dan tabel perbandingan paket.
 - Checkout Duitku, callback validation, dan activation entitlement.
 - Admin dashboard untuk melihat payment order, entitlement, usage, review, dan audit log.
 - Privacy Policy, Terms of Service, Contact, robots, dan sitemap.
