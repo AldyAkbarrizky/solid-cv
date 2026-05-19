@@ -22,7 +22,7 @@
    - identity hash dibentuk dari request header yang dinormalisasi aman untuk `Request`, `Headers`, dan `ReadonlyHeaders` Next.js (`src/lib/security/request-identity.ts`)
 3. **Quota limiting**:
    - guest: 1 review / 24 jam
-   - user free: 3 review / bulan (default)
+   - user free: 15 review / bulan (default)
 4. **File validation berlapis**:
    - extension
    - MIME type

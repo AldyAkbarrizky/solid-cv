@@ -10,12 +10,17 @@ Saat ini ada dua plan:
 
 - `paid_basic`
   - harga: Rp29.000
-  - kuota: 30 review
+  - kuota: 60 review
   - aktif: 30 hari
 - `paid_pro`
   - harga: Rp79.000
-  - kuota: 100 review
+  - kuota: 180 review
   - aktif: 30 hari
+
+Selain plan berbayar:
+
+- `guest`: 1 review / 24 jam
+- `free` (login): 15 review / bulan
 
 Halaman yang memakai plan:
 

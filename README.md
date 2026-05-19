@@ -98,7 +98,8 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 - Masking PII dasar sebelum teks dikirim ke AI.
 - Review CV berbasis Groq dengan output JSON tervalidasi Zod.
 - Riwayat review untuk user login.
-- Guest mode dengan kuota terbatas.
+- Guest mode dengan kuota 1 review per 24 jam.
+- Free login dengan kuota 15 review per bulan.
 - Paket berbayar `paid_basic` dan `paid_pro`.
 - Halaman pricing dengan status paket/kuota akun dan tabel perbandingan paket.
 - CTA upgrade paket tersedia di header, halaman review, dan halaman riwayat.

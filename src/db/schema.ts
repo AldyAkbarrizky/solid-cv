@@ -65,7 +65,7 @@ export const userEntitlements = pgTable(
     planCode: varchar("plan_code", { length: 40 }).notNull().default("free"),
     status: varchar("status", { length: 30 }).notNull().default("active"),
 
-    reviewQuotaLimit: integer("review_quota_limit").notNull().default(3),
+    reviewQuotaLimit: integer("review_quota_limit").notNull().default(15),
 
     currentPeriodStart: timestamp("current_period_start").notNull(),
     currentPeriodEnd: timestamp("current_period_end").notNull(),

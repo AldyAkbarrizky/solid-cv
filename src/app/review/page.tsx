@@ -158,7 +158,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
 
             {!user && (
               <p className="mt-3 text-xs leading-5 text-indigo-700">
-                Masuk dengan akun Google untuk mendapatkan 3 review per bulan
+                Masuk dengan akun Google untuk mendapatkan 15 review per bulan
                 dan menyimpan riwayat hasil analisis.
               </p>
             )}

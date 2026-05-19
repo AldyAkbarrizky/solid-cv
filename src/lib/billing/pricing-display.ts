@@ -25,13 +25,13 @@ export const publicPricingPlans: PublicPricingPlan[] = [
     name: "Free",
     price: "Rp0",
     period: "/bulan",
-    quota: "3 review CV",
+    quota: "15 review CV",
     description:
-      "Untuk mencoba review CV dan menyimpan hasil awal di akun Solid CV.",
+      "Untuk pengguna yang ingin iterasi rutin tanpa biaya bulanan.",
     features: [
-      "3 review CV per bulan",
+      "15 review CV per bulan",
       "Hasil review tersimpan di riwayat akun",
-      "Cocok untuk perbaikan ringan",
+      "Cocok untuk iterasi mingguan",
     ],
   },
   {
@@ -71,7 +71,7 @@ export const pricingComparisonRows = [
   {
     feature: "Kuota review",
     guest: "1 review / 24 jam",
-    free: "3 review / bulan",
+    free: "15 review / bulan",
     basic: `${billingPlans.paid_basic.reviewQuotaLimit} review / 30 hari`,
     pro: `${billingPlans.paid_pro.reviewQuotaLimit} review / 30 hari`,
   },
@@ -99,7 +99,7 @@ export const pricingComparisonRows = [
   {
     feature: "Cocok untuk",
     guest: "Coba sekali",
-    free: "Perbaikan ringan",
+    free: "Iterasi rutin",
     basic: "Beberapa versi CV",
     pro: "Banyak role dan iterasi",
   },

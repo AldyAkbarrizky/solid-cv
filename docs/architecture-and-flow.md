@@ -50,7 +50,7 @@
 ## Alur akun, kuota, dan entitlement
 
 - Guest mendapat kuota terbatas berdasarkan identity hash dari IP + user-agent.
-- User login mendapat kuota free default.
+- User login mendapat kuota free default (15 review / bulan).
 - User yang membeli paket berbayar mendapat entitlement baru melalui `upsertUserEntitlement`.
 - Status kuota dibaca di halaman `/review` melalui `getReviewQuotaStatus`.
 - Status paket dan kuota juga ditampilkan di `/pricing`; route `/billing` hanya redirect ke `/pricing`.

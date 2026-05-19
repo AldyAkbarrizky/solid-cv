@@ -5,7 +5,7 @@ import { reviewUsageEvents, userEntitlements } from "@/db/schema";
 import { getRequestIdentityHash } from "@/lib/security/request-identity";
 
 const GUEST_REVIEW_LIMIT = 1;
-const FREE_USER_REVIEW_LIMIT = 3;
+const FREE_USER_REVIEW_LIMIT = 15;
 
 type ReviewQuotaStatus = {
   allowed: boolean;

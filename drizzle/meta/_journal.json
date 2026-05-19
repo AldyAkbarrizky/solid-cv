@@ -64,6 +64,13 @@
       "when": 1779178639758,
       "tag": "0008_famous_martin_li",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1779187600000,
+      "tag": "0009_mighty_shadow_king",
+      "breakpoints": true
     }
   ]
 }
