@@ -208,8 +208,8 @@ export default async function PricingPage() {
 
         {user && hasActivePaidPlan && (
           <div className="mt-5 rounded-lg border border-sky-200 bg-sky-50/60 p-4 text-sm leading-6 text-sky-900">
-            Anda masih memiliki paket aktif. Pembelian paket baru belum
-            tersedia pada versi ini.
+            Anda masih memiliki paket aktif. Pembelian paket baru belum tersedia
+            pada versi ini.
           </div>
         )}
 
@@ -230,7 +230,7 @@ export default async function PricingPage() {
           </div>
 
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[760px] border-separate border-spacing-0 text-left text-sm">
+            <table className="w-full min-w-190 border-separate border-spacing-0 text-left text-sm">
               <thead>
                 <tr className="text-muted-foreground">
                   <th className="border-b px-4 py-3 font-medium">Fitur</th>

@@ -4,9 +4,6 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { paymentOrders } from "@/db/schema";
 import { createDuitkuCallbackSignature } from "@/lib/billing/duitku";
-import { getBillingPlan } from "@/lib/billing/plans";
-import { upsertUserEntitlement } from "@/lib/quota/entitlements";
-import { checkDuitkuTransactionStatus } from "@/lib/billing/duitku";
 import { syncPaymentOrderWithDuitku } from "@/lib/billing/payment-sync";
 
 export const runtime = "nodejs";

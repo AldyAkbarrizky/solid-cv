@@ -498,7 +498,7 @@ export default async function AdminPaymentDetailPage({
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[860px] text-sm">
+              <table className="w-full min-w-215 text-sm">
                 <thead className="border-b bg-slate-50 text-left text-xs uppercase tracking-[0.12em] text-slate-500">
                   <tr>
                     <th className="px-5 py-3">Time</th>
@@ -529,7 +529,7 @@ export default async function AdminPaymentDetailPage({
                       </td>
 
                       <td className="px-5 py-4">
-                        <pre className="max-w-[420px] overflow-x-auto rounded-md bg-slate-50 p-3 text-xs leading-5 text-slate-700">
+                        <pre className="max-w-105 overflow-x-auto rounded-md bg-slate-50 p-3 text-xs leading-5 text-slate-700">
                           {JSON.stringify(log.metadata, null, 2)}
                         </pre>
                       </td>

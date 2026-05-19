@@ -398,13 +398,16 @@ export default function Home() {
               Mulai gratis, tambah kuota saat butuh iterasi lebih banyak.
             </h2>
             <p className="mt-4 text-sm leading-7 text-slate-600">
-              Semua paket memakai format review yang sama. Perbedaannya ada
-              pada kuota, periode penggunaan, dan apakah hasil tersimpan di
-              akun.
+              Semua paket memakai format review yang sama. Perbedaannya ada pada
+              kuota, periode penggunaan, dan apakah hasil tersimpan di akun.
             </p>
           </div>
 
-          <Button asChild variant="outline" className="w-full bg-white md:w-auto">
+          <Button
+            asChild
+            variant="outline"
+            className="w-full bg-white md:w-auto"
+          >
             <Link href="/pricing">
               Lihat detail paket
               <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -457,7 +460,7 @@ export default function Home() {
         </div>
 
         <div className="mt-6 overflow-x-auto rounded-lg border bg-white">
-          <table className="w-full min-w-[760px] border-separate border-spacing-0 text-left text-sm">
+          <table className="w-full min-w-190 border-separate border-spacing-0 text-left text-sm">
             <thead>
               <tr className="text-muted-foreground">
                 <th className="border-b px-4 py-3 font-medium">Fitur</th>
