@@ -24,6 +24,14 @@ type DuitkuCreateInvoiceResponse = {
   statusMessage: string;
 };
 
+type DuitkuTransactionStatusResponse = {
+  merchantOrderId: string;
+  reference: string;
+  amount: string;
+  statusCode: string;
+  statusMessage: string;
+};
+
 function getDuitkuConfig() {
   const env = process.env.DUITKU_ENV || "sandbox";
   const merchantCode = process.env.DUITKU_MERCHANT_CODE;
@@ -132,4 +140,40 @@ export async function createDuitkuInvoice({
   }
 
   return data as DuitkuCreateInvoiceResponse;
+}
+
+export async function checkDuitkuTransactionStatus(merchantOrderId: string) {
+  const { env, merchantCode, apiKey } = getDuitkuConfig();
+
+  const baseUrl =
+    env === "production"
+      ? "https://passport.duitku.com/webapi/api/merchant/transactionStatus"
+      : "https://sandbox.duitku.com/webapi/api/merchant/transactionStatus";
+
+  const signature = createHash("md5")
+    .update(`${merchantCode}${merchantOrderId}${apiKey}`)
+    .digest("hex");
+
+  const formData = new URLSearchParams();
+  formData.append("merchantCode", merchantCode);
+  formData.append("merchantOrderId", merchantOrderId);
+  formData.append("signature", signature);
+
+  const response = await fetch(baseUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: formData,
+  });
+
+  const data = (await response.json()) as DuitkuTransactionStatusResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      `Gagal cek status transaksi Duitku. HTTP ${response.status}`,
+    );
+  }
+
+  return data;
 }

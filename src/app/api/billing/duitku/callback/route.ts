@@ -6,6 +6,7 @@ import { paymentOrders } from "@/db/schema";
 import { createDuitkuCallbackSignature } from "@/lib/billing/duitku";
 import { getBillingPlan } from "@/lib/billing/plans";
 import { upsertUserEntitlement } from "@/lib/quota/entitlements";
+import { checkDuitkuTransactionStatus } from "@/lib/billing/duitku";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -70,6 +71,23 @@ export async function POST(request: Request) {
     }
 
     if (resultCode === "00") {
+      const transactionStatus =
+        await checkDuitkuTransactionStatus(merchantOrderId);
+
+      if (transactionStatus.statusCode !== "00") {
+        await db
+          .update(paymentOrders)
+          .set({
+            status: "pending",
+            duitkuReference: reference,
+            resultCode,
+            updatedAt: new Date(),
+          })
+          .where(eq(paymentOrders.id, order.id));
+
+        return NextResponse.json({ message: "OK" });
+      }
+
       const plan = getBillingPlan(order.planCode);
 
       if (!plan) {

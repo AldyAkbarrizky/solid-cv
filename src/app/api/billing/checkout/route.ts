@@ -6,7 +6,8 @@ import { paymentOrders } from "@/db/schema";
 import { createDuitkuInvoice } from "@/lib/billing/duitku";
 import { getBillingPlan } from "@/lib/billing/plans";
 import { getCurrentUser } from "@/lib/session";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { userEntitlements } from "@/db/schema";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +38,31 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { message: "Email user tidak ditemukan." },
         { status: 400 },
+      );
+    }
+
+    const [activeEntitlement] = await db
+      .select()
+      .from(userEntitlements)
+      .where(
+        and(
+          eq(userEntitlements.userId, user.id),
+          eq(userEntitlements.status, "active"),
+        ),
+      )
+      .limit(1);
+
+    if (
+      activeEntitlement &&
+      activeEntitlement.planCode !== "free" &&
+      activeEntitlement.currentPeriodEnd.getTime() > Date.now()
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "Anda masih memiliki paket aktif. Pembelian paket baru belum tersedia pada versi ini.",
+        },
+        { status: 409 },
       );
     }
 

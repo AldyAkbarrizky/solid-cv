@@ -122,6 +122,15 @@ export async function SiteHeader({
                 </Link>
               </Button>
 
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="hidden bg-white md:inline-flex"
+              >
+                <Link href="/billing">Billing</Link>
+              </Button>
+
               <LogoutButton />
             </>
           ) : (
