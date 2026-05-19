@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/session";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckoutButton } from "./checkout-button";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Paket Berbayar - Solid CV",
@@ -43,17 +44,14 @@ export default async function PricingPage() {
                 <p className="text-sm font-semibold text-primary">
                   Solid CV {plan.name}
                 </p>
-
                 <div className="mt-4 flex items-end gap-1">
                   <span className="text-4xl font-semibold tracking-tight text-slate-950">
                     Rp{new Intl.NumberFormat("id-ID").format(plan.price)}
                   </span>
                 </div>
-
                 <p className="mt-3 text-sm leading-6 text-slate-600">
                   {plan.description}
                 </p>
-
                 <div className="mt-6 rounded-lg border bg-slate-50 p-4">
                   <p className="text-sm font-semibold text-slate-950">
                     {plan.reviewQuotaLimit} review CV
@@ -62,11 +60,22 @@ export default async function PricingPage() {
                     Berlaku {plan.activeDays} hari setelah pembayaran berhasil.
                   </p>
                 </div>
-
                 <div className="mt-6">
                   <CheckoutButton planCode={plan.code} disabled={!user} />
                 </div>
-
+                <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                  Dengan membeli paket, Anda menyetujui{" "}
+                  <Link href="/terms" className="font-medium text-primary">
+                    Terms
+                  </Link>{" "}
+                  dan memahami bahwa aktivasi paket dilakukan setelah callback
+                  pembayaran tervalidasi.
+                </p>
+                Jika ada kendala pembayaran, hubungi kami melalui{" "}
+                <Link href="/contact" className="font-medium text-primary">
+                  Contact
+                </Link>
+                .
                 {!user && (
                   <p className="mt-3 text-xs leading-5 text-amber-700">
                     Login diperlukan sebelum membeli paket.

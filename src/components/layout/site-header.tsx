@@ -71,6 +71,9 @@ export async function SiteHeader({
             <Link href="#privasi" className="transition hover:text-primary">
               Privasi
             </Link>
+            <Link href="/contact" className="transition hover:text-primary">
+              Kontak
+            </Link>
           </nav>
         )}
 

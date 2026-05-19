@@ -407,7 +407,18 @@ export default function Home() {
           <p>
             © 2026 Solid CV. Dibuat untuk membantu pencari kerja memperbaiki CV.
           </p>
-          <p>Privasi file dan keamanan aplikasi menjadi fokus utama.</p>
+
+          <div className="flex flex-wrap gap-4">
+            <Link href="/privacy" className="hover:text-primary">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-primary">
+              Terms
+            </Link>
+            <Link href="/contact" className="hover:text-primary">
+              Contact
+            </Link>
+          </div>
         </div>
       </footer>
     </main>

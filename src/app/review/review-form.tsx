@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024;
 
@@ -291,7 +292,20 @@ export function ReviewForm() {
               </Label>
               <p className="text-xs leading-5 text-muted-foreground">
                 File digunakan untuk proses analisis dan tidak disimpan sebagai
-                dokumen permanen setelah proses selesai.
+                dokumen permanen setelah proses selesai. Saya juga memahami
+                hasil analisis bersifat rekomendasi. Lihat{" "}
+                <Link href="/privacy" className="font-medium text-primary">
+                  Privacy Policy
+                </Link>
+                ,{" "}
+                <Link href="/terms" className="font-medium text-primary">
+                  Terms
+                </Link>
+                , atau{" "}
+                <Link href="/contact" className="font-medium text-primary">
+                  Contact
+                </Link>
+                .
               </p>
             </div>
           </div>

@@ -43,7 +43,6 @@ export default async function LoginPage() {
               </p>
             </div>
           </Link>
-
           <div className="mt-8">
             <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
               Masuk ke akun Anda
@@ -53,15 +52,22 @@ export default async function LoginPage() {
               kuota penggunaan.
             </p>
           </div>
-
           <div className="mt-6">
             <GoogleLoginButton />
           </div>
-
-          <p className="mt-6 text-xs leading-5 text-muted-foreground">
-            Dengan masuk, Anda menyetujui pemrosesan data yang diperlukan untuk
-            autentikasi dan penyimpanan riwayat review.
-          </p>
+          Dengan masuk, Anda menyetujui{" "}
+          <Link href="/terms" className="font-medium text-primary">
+            Terms
+          </Link>
+          ,{" "}
+          <Link href="/privacy" className="font-medium text-primary">
+            Privacy Policy
+          </Link>
+          , dan dapat menghubungi kami melalui{" "}
+          <Link href="/contact" className="font-medium text-primary">
+            Contact
+          </Link>
+          .
         </CardContent>
       </Card>
     </main>
