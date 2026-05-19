@@ -87,8 +87,23 @@ export async function extractTextFromCV({
 }: ExtractTextParams) {
   if (fileKind === "pdf") {
     const pdfParse = (await import("pdf-parse")).default;
-    const result = await pdfParse(buffer, { pagerender: renderPdfPage });
-    return normalizeText(result.text || "");
+
+    // Try custom renderer first — better spacing reconstruction for most PDFs
+    const customResult = await pdfParse(buffer, { pagerender: renderPdfPage });
+    const customText = normalizeText(customResult.text || "");
+
+    // Some PDFs (e.g. Canva, heavily styled, or two-column with non-standard
+    // coordinate ordering) may extract less text with the custom renderer.
+    // Fall back to pdfjs default renderer if it yields more content.
+    if (customText.length < 200) {
+      const defaultResult = await pdfParse(buffer);
+      const defaultText = normalizeText(defaultResult.text || "");
+      if (defaultText.length > customText.length) {
+        return defaultText;
+      }
+    }
+
+    return customText;
   }
 
   if (fileKind === "docx") {

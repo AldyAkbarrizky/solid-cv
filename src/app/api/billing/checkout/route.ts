@@ -6,6 +6,7 @@ import { paymentOrders } from "@/db/schema";
 import { createDuitkuInvoice } from "@/lib/billing/duitku";
 import { getBillingPlan } from "@/lib/billing/plans";
 import { getCurrentUser } from "@/lib/session";
+import { captureError } from "@/lib/observability";
 import { and, eq } from "drizzle-orm";
 import { userEntitlements } from "@/db/schema";
 
@@ -135,9 +136,7 @@ export async function POST(request: Request) {
       paymentUrl: invoice.paymentUrl,
     });
   } catch (error) {
-    console.error("CHECKOUT_ERROR", {
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    captureError("CHECKOUT_ERROR", error);
 
     return NextResponse.json(
       { message: "Gagal membuat transaksi pembayaran." },

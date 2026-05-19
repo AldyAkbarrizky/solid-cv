@@ -7,6 +7,7 @@ import { generateCVReview } from "@/lib/ai/ai-client";
 import { extractTextFromCV } from "@/lib/cv/extract-text";
 import { maskPII } from "@/lib/cv/mask-pii";
 
+import { captureError, captureWarning } from "@/lib/observability";
 import { checkReviewRateLimit } from "@/lib/security/rate-limit";
 import { getReviewExpiresAt } from "@/lib/review/retention";
 import { getCurrentUser } from "@/lib/session";
@@ -166,7 +167,7 @@ export async function POST(request: Request) {
     });
 
     if (!extractedText || extractedText.length < 200) {
-      console.warn("CV_TEXT_EXTRACTION_SHORT", {
+      captureWarning("CV_TEXT_EXTRACTION_SHORT", {
         charCount: extractedText?.length ?? 0,
         fileKind,
       });
@@ -256,18 +257,11 @@ export async function POST(request: Request) {
       try {
         await releaseReservedReviewUsage(reservedUsageEventId);
       } catch (releaseError) {
-        console.error("REVIEW_QUOTA_RELEASE_ERROR", {
-          message:
-            releaseError instanceof Error
-              ? releaseError.message
-              : "Unknown error",
-        });
+        captureError("REVIEW_QUOTA_RELEASE_ERROR", releaseError);
       }
     }
 
-    console.error("CV_ANALYZE_ERROR", {
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    captureError("CV_ANALYZE_ERROR", error);
 
     return NextResponse.json(
       {

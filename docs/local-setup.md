@@ -48,6 +48,11 @@ DUITKU_PRODUCTION_BASE_URL=https://api-prod.duitku.com
 
 NEXT_PUBLIC_SUPPORT_EMAIL=support@solidtechno.com
 NEXT_PUBLIC_COMPANY_NAME=SolidTechno ID
+
+# Opsional: Sentry error tracking
+# Isi kalau mau error dikirim ke Sentry. Kalau kosong, Sentry tidak aktif.
+SENTRY_DSN=
+NEXT_PUBLIC_SENTRY_DSN=
 ```
 
 Catatan:
@@ -57,6 +62,7 @@ Catatan:
 - `ADMIN_EMAILS` berisi daftar email admin, dipisahkan koma. Contoh: `admin@domain.com,ops@domain.com`.
 - Provider AI aktif saat ini adalah Groq. File provider DeepSeek masih disiapkan untuk pengembangan berikutnya.
 - Duitku bisa berjalan dalam mode `sandbox` atau `production`, tergantung `DUITKU_ENV`.
+- `SENTRY_DSN` dan `NEXT_PUBLIC_SENTRY_DSN` opsional. Buat project di [sentry.io](https://sentry.io), ambil DSN dari Settings > Projects > Client Keys. Kalau kosong, Sentry tidak aktif dan tidak ada overhead.
 
 ## 4) Migrasi database
 
@@ -84,6 +90,7 @@ Buka `http://localhost:3000`.
 ```bash
 npm run lint
 npm run build
+npm test       # unit test kuota
 ```
 
 `npm run build` berguna untuk menangkap error route App Router, dynamic page, dan env usage sebelum deploy.

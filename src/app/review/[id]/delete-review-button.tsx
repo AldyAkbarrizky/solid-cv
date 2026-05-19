@@ -13,14 +13,10 @@ type DeleteReviewButtonProps = {
 export function DeleteReviewButton({ reviewId }: DeleteReviewButtonProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmStep, setConfirmStep] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleDelete() {
-    const confirmed = window.confirm(
-      "Hapus hasil review ini? Data hasil analisis akan dihapus dari database.",
-    );
-
-    if (!confirmed) return;
-
     setIsDeleting(true);
 
     try {
@@ -34,6 +30,7 @@ export function DeleteReviewButton({ reviewId }: DeleteReviewButtonProps) {
         throw new Error(result?.message || "Gagal menghapus hasil review.");
       }
 
+      setConfirmStep(false);
       router.replace("/review?deleted=1");
       router.refresh();
     } catch (error) {
@@ -42,32 +39,56 @@ export function DeleteReviewButton({ reviewId }: DeleteReviewButtonProps) {
           ? error.message
           : "Gagal menghapus hasil review.";
 
-      window.alert(message);
+      setErrorMessage(message);
     } finally {
       setIsDeleting(false);
     }
   }
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      className="border-rose-200 bg-white text-rose-700 hover:bg-rose-50 hover:text-rose-800"
-      onClick={handleDelete}
-      disabled={isDeleting}
-    >
-      {isDeleting ? (
-        <>
-          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-          Menghapus
-        </>
+    <div>
+      {confirmStep ? (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                Menghapus
+              </>
+            ) : (
+              "Ya, hapus"
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setConfirmStep(false)}
+            disabled={isDeleting}
+          >
+            Batal
+          </Button>
+        </div>
       ) : (
-        <>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="border-rose-200 bg-white text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+          onClick={() => setConfirmStep(true)}
+          disabled={isDeleting}
+        >
           <Trash2 className="mr-1.5 h-4 w-4" />
           Hapus hasil
-        </>
+        </Button>
       )}
-    </Button>
+      {errorMessage && (
+        <p className="mt-1 text-sm text-destructive">{errorMessage}</p>
+      )}
+    </div>
   );
 }

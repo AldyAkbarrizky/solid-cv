@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cvReviews } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { captureError } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,9 +49,7 @@ export async function DELETE(
       message: "Hasil review berhasil dihapus.",
     });
   } catch (error) {
-    console.error("DELETE_REVIEW_ERROR", {
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    captureError("DELETE_REVIEW_ERROR", error);
 
     return NextResponse.json(
       {

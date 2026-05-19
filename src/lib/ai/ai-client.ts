@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
+import { captureWarning } from "@/lib/observability";
 import {
   buildCVReviewSystemPrompt,
   buildCVReviewUserPrompt,
@@ -82,7 +83,7 @@ function validateAIResult(content: string): CVReviewResult {
   const validated = CVReviewResultSchema.safeParse(parsedJson);
 
   if (!validated.success) {
-    console.warn("CV_AI_SCHEMA_MISMATCH", {
+    captureWarning("CV_AI_SCHEMA_MISMATCH", {
       issues: validated.error.issues.map((i) => ({
         path: i.path.join("."),
         message: i.message,
@@ -198,7 +199,7 @@ export async function generateCVReview(
     if (!(error instanceof AIResponseFormatError)) {
       throw error;
     }
-    console.warn("CV_AI_FIRST_ATTEMPT_FAILED", { message: error.message });
+    captureWarning("CV_AI_FIRST_ATTEMPT_FAILED", { message: error.message });
   }
 
   const retryAttempt = await requestAICompletion({

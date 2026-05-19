@@ -15,8 +15,10 @@ export function CheckPaymentStatusButton({
 }: CheckPaymentStatusButtonProps) {
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleCheckStatus() {
+    setErrorMessage(null);
     setIsChecking(true);
 
     try {
@@ -38,32 +40,37 @@ export function CheckPaymentStatusButton({
       const message =
         error instanceof Error ? error.message : "Gagal mengecek status.";
 
-      window.alert(message);
+      setErrorMessage(message);
     } finally {
       setIsChecking(false);
     }
   }
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      className="bg-white"
-      onClick={handleCheckStatus}
-      disabled={isChecking}
-    >
-      {isChecking ? (
-        <>
-          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-          Checking
-        </>
-      ) : (
-        <>
-          <RefreshCw className="mr-1.5 h-4 w-4" />
-          Check Duitku
-        </>
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="bg-white"
+        onClick={handleCheckStatus}
+        disabled={isChecking}
+      >
+        {isChecking ? (
+          <>
+            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            Checking
+          </>
+        ) : (
+          <>
+            <RefreshCw className="mr-1.5 h-4 w-4" />
+            Check Duitku
+          </>
+        )}
+      </Button>
+      {errorMessage && (
+        <p className="mt-2 text-sm text-destructive">{errorMessage}</p>
       )}
-    </Button>
+    </>
   );
 }

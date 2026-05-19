@@ -75,6 +75,7 @@ npm run dev          # jalankan local dev server
 npm run build        # build production
 npm run start        # jalankan hasil build
 npm run lint         # linting
+npm test             # unit test kuota
 npm run db:generate  # generate migration
 npm run db:migrate   # run migration
 npm run db:studio    # buka Drizzle Studio
@@ -122,5 +123,6 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 - File CV tidak disimpan sebagai dokumen permanen.
 - Hasil review AI bersifat rekomendasi, bukan jaminan diterima kerja.
 - Ada rate limit dan quota usage untuk mencegah penyalahgunaan.
+- Error production dikirim ke Sentry jika `SENTRY_DSN` diisi (opsional, default off).
 - Halaman `/review` tetap bisa diakses sebagai guest (tanpa login) selama kuota guest masih tersedia.
 - Aktivasi paket berbayar dilakukan melalui callback Duitku yang valid, bukan dari halaman return pembayaran.

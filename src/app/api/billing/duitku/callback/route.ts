@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { paymentOrders } from "@/db/schema";
 import { createDuitkuCallbackSignature } from "@/lib/billing/duitku";
 import { syncPaymentOrderWithDuitku } from "@/lib/billing/payment-sync";
+import { captureError, captureWarning } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,9 +38,7 @@ export async function POST(request: Request) {
     });
 
     if (signature !== expectedSignature) {
-      console.error("DUITKU_CALLBACK_BAD_SIGNATURE", {
-        merchantOrderId,
-      });
+      captureWarning("DUITKU_CALLBACK_BAD_SIGNATURE", { merchantOrderId });
 
       return NextResponse.json({ message: "Bad signature" }, { status: 400 });
     }
@@ -55,7 +54,7 @@ export async function POST(request: Request) {
     }
 
     if (Number(amount) !== order.amount) {
-      console.error("DUITKU_CALLBACK_AMOUNT_MISMATCH", {
+      captureWarning("DUITKU_CALLBACK_AMOUNT_MISMATCH", {
         merchantOrderId,
         callbackAmount: amount,
         orderAmount: order.amount,
@@ -85,9 +84,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "OK" });
   } catch (error) {
-    console.error("DUITKU_CALLBACK_ERROR", {
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    captureError("DUITKU_CALLBACK_ERROR", error);
 
     return NextResponse.json({ message: "Callback failed" }, { status: 500 });
   }

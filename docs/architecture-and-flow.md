@@ -28,6 +28,8 @@
 - `src/lib/quota`: logika kuota guest/user dan entitlement paket
 - `src/lib/admin.ts`: pengecekan admin berdasarkan `ADMIN_EMAILS`
 - `src/lib/config/env.ts`: validasi env production
+- `src/lib/observability.ts`: wrapper `captureError`/`captureWarning` → console + Sentry (opsional)
+- `src/instrumentation.ts`: Next.js hook untuk inisialisasi Sentry server-side
 - `src/db`: koneksi Drizzle + schema tabel
 
 ## Alur end-to-end review CV

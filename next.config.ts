@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -8,7 +9,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self'",
-  "connect-src 'self' https://api.groq.com https://api.deepseek.com https://api-sandbox.duitku.com https://api-prod.duitku.com https://sandbox.duitku.com https://passport.duitku.com",
+  "connect-src 'self' https://api.groq.com https://api.deepseek.com https://api-sandbox.duitku.com https://api-prod.duitku.com https://sandbox.duitku.com https://passport.duitku.com https://*.ingest.sentry.io",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self' https://*.duitku.com https://duitku.com",
@@ -62,4 +63,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry hanya aktif kalau SENTRY_DSN diisi — kalau tidak, export config biasa
+export default process.env.SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      silent: true,
+      disableLogger: true,
+      sourcemaps: { disable: true },
+      widenClientFileUpload: false,
+      automaticVercelMonitors: false,
+    })
+  : nextConfig;

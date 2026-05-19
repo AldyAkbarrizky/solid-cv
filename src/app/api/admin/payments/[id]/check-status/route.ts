@@ -6,6 +6,7 @@ import { paymentOrders } from "@/db/schema";
 import { getCurrentAdminUser } from "@/lib/admin";
 import { syncPaymentOrderWithDuitku } from "@/lib/billing/payment-sync";
 import { writeAdminAuditLog } from "@/lib/admin-audit";
+import { captureError } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -64,9 +65,7 @@ export async function POST(
       result,
     });
   } catch (error) {
-    console.error("ADMIN_CHECK_PAYMENT_STATUS_ERROR", {
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    captureError("ADMIN_CHECK_PAYMENT_STATUS_ERROR", error);
 
     return NextResponse.json(
       { message: "Gagal mengecek status pembayaran." },
