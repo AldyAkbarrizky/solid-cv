@@ -82,6 +82,13 @@ function validateAIResult(content: string): CVReviewResult {
   const validated = CVReviewResultSchema.safeParse(parsedJson);
 
   if (!validated.success) {
+    console.warn("CV_AI_SCHEMA_MISMATCH", {
+      issues: validated.error.issues.map((i) => ({
+        path: i.path.join("."),
+        message: i.message,
+      })),
+      rawContentSnippet: content.slice(0, 500),
+    });
     throw new AIResponseFormatError(
       "Struktur JSON dari AI tidak sesuai schema.",
     );
@@ -143,6 +150,7 @@ async function requestAICompletion({
   const completion = await client.chat.completions.create({
     model,
     temperature: 0.2,
+    max_tokens: 4096,
     messages,
   });
 
@@ -164,26 +172,33 @@ export async function generateCVReview(
 ): Promise<GenerateCVReviewResponse> {
   const { provider, model, client } = createGroqClient();
 
-  const firstAttempt = await requestAICompletion({
-    client,
-    model,
-    messages: buildInitialMessages(params),
-  });
+  let firstInputTokens = 0;
+  let firstOutputTokens = 0;
 
   try {
+    const firstAttempt = await requestAICompletion({
+      client,
+      model,
+      messages: buildInitialMessages(params),
+    });
+
+    firstInputTokens = firstAttempt.inputTokens || 0;
+    firstOutputTokens = firstAttempt.outputTokens || 0;
+
     const result = validateAIResult(firstAttempt.content);
 
     return {
       provider,
       model,
       result,
-      inputTokens: firstAttempt.inputTokens,
-      outputTokens: firstAttempt.outputTokens,
+      inputTokens: firstInputTokens,
+      outputTokens: firstOutputTokens,
     };
   } catch (error) {
     if (!(error instanceof AIResponseFormatError)) {
       throw error;
     }
+    console.warn("CV_AI_FIRST_ATTEMPT_FAILED", { message: error.message });
   }
 
   const retryAttempt = await requestAICompletion({
@@ -198,9 +213,7 @@ export async function generateCVReview(
     provider,
     model,
     result: retryResult,
-    inputTokens:
-      (firstAttempt.inputTokens || 0) + (retryAttempt.inputTokens || 0),
-    outputTokens:
-      (firstAttempt.outputTokens || 0) + (retryAttempt.outputTokens || 0),
+    inputTokens: firstInputTokens + (retryAttempt.inputTokens || 0),
+    outputTokens: firstOutputTokens + (retryAttempt.outputTokens || 0),
   };
 }

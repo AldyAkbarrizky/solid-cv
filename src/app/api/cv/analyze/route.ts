@@ -166,6 +166,10 @@ export async function POST(request: Request) {
     });
 
     if (!extractedText || extractedText.length < 200) {
+      console.warn("CV_TEXT_EXTRACTION_SHORT", {
+        charCount: extractedText?.length ?? 0,
+        fileKind,
+      });
       return NextResponse.json(
         {
           message:

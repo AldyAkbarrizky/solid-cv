@@ -17,7 +17,10 @@ export const CVReviewResultSchema = z.object({
       priority: z.enum(["high", "medium", "low"]),
       title: z.string().min(1),
       explanation: z.string().min(1),
-      exampleRewrite: z.string().optional(),
+      exampleRewrite: z
+        .string()
+        .nullish()
+        .transform((v) => v ?? undefined),
     }),
   ),
   missingKeywords: z.array(z.string()).default([]),
