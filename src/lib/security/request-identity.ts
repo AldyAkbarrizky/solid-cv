@@ -1,11 +1,28 @@
 import { createHash } from "node:crypto";
 
+type HeadersLike = {
+  get(name: string): string | null;
+};
+
+function isHeadersLike(value: unknown): value is HeadersLike {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "get" in value &&
+    typeof (value as { get?: unknown }).get === "function"
+  );
+}
+
 function getHeaders(input: Request | Headers) {
-  if ("headers" in input) {
+  if (isHeadersLike(input)) {
+    return input;
+  }
+
+  if ("headers" in input && isHeadersLike(input.headers)) {
     return input.headers;
   }
 
-  return input;
+  return new Headers();
 }
 
 function getClientIdentity(input: Request | Headers) {

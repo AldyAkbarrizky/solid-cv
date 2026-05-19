@@ -15,6 +15,7 @@ Kalau butuh konteks cepat:
 - Header global: `src/components/layout/site-header.tsx`
 - Halaman form review: `src/app/review/page.tsx`
 - Halaman pricing dan status kuota: `src/app/pricing/page.tsx`
+- CTA upgrade paket: header, panel kuota review, dan halaman riwayat
 - API utama analisis CV: `src/app/api/cv/analyze/route.ts`
 - API checkout: `src/app/api/billing/checkout/route.ts`
 - Callback Duitku: `src/app/api/billing/duitku/callback/route.ts`

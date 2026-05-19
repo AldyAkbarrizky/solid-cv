@@ -101,6 +101,7 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 - Guest mode dengan kuota terbatas.
 - Paket berbayar `paid_basic` dan `paid_pro`.
 - Halaman pricing dengan status paket/kuota akun dan tabel perbandingan paket.
+- CTA upgrade paket tersedia di header, halaman review, dan halaman riwayat.
 - Checkout Duitku, callback validation, dan activation entitlement.
 - Admin dashboard untuk melihat payment order, entitlement, usage, review, dan audit log.
 - Privacy Policy, Terms of Service, Contact, robots, dan sitemap.
@@ -110,4 +111,5 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 - File CV tidak disimpan sebagai dokumen permanen.
 - Hasil review AI bersifat rekomendasi, bukan jaminan diterima kerja.
 - Ada rate limit dan quota usage untuk mencegah penyalahgunaan.
+- Halaman `/review` tetap bisa diakses sebagai guest (tanpa login) selama kuota guest masih tersedia.
 - Aktivasi paket berbayar dilakukan melalui callback Duitku yang valid, bukan dari halaman return pembayaran.

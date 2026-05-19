@@ -85,9 +85,14 @@ export default async function HistoryPage() {
             </p>
           </div>
 
-          <Button asChild className="h-11">
-            <Link href="/review">Review CV baru</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" className="h-11 bg-white">
+              <Link href="/pricing">Upgrade paket</Link>
+            </Button>
+            <Button asChild className="h-11">
+              <Link href="/review">Review CV baru</Link>
+            </Button>
+          </div>
         </div>
 
         {reviewItems.length > 0 ? (

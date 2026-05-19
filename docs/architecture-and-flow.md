@@ -54,12 +54,14 @@
 - User yang membeli paket berbayar mendapat entitlement baru melalui `upsertUserEntitlement`.
 - Status kuota dibaca di halaman `/review` melalui `getReviewQuotaStatus`.
 - Status paket dan kuota juga ditampilkan di `/pricing`; route `/billing` hanya redirect ke `/pricing`.
+- Halaman `/review` tetap bisa dibuka tanpa login (guest). Jika pengecekan session gagal, aplikasi fallback ke mode guest.
 
 File utama:
 
 - `src/lib/quota/review-quota.ts`
 - `src/lib/quota/entitlements.ts`
 - `src/db/schema.ts`
+- `src/lib/security/request-identity.ts`
 
 ## Alur pembayaran singkat
 

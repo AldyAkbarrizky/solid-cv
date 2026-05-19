@@ -176,6 +176,17 @@ export async function SiteHeader({
                     </Link>
                   </Button>
                 )}
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="hidden bg-white md:inline-flex"
+                >
+                  <Link href="/pricing">
+                    <CreditCard className="mr-1.5 h-4 w-4" />
+                    Upgrade
+                  </Link>
+                </Button>
 
                 <details className="group relative">
                   <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-full border border-border bg-card/80 py-1 pr-2 pl-1 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/45 hover:bg-muted/80 hover:shadow-md active:translate-y-px [&::-webkit-details-marker]:hidden">
@@ -238,6 +249,17 @@ export async function SiteHeader({
                   <Link href="/login">
                     <LogIn className="mr-1.5 h-4 w-4" />
                     Masuk
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="hidden bg-white sm:inline-flex"
+                >
+                  <Link href="/pricing">
+                    <CreditCard className="mr-1.5 h-4 w-4" />
+                    Paket
                   </Link>
                 </Button>
 

@@ -1,4 +1,5 @@
 import { AlertTriangle, Clock3, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 import { ReviewForm } from "./review-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -7,6 +8,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { getCurrentUser } from "@/lib/session";
 import { headers } from "next/headers";
 import { getReviewQuotaStatus } from "@/lib/quota/review-quota";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Review CV - Solid CV",
@@ -139,6 +141,19 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
                   .
                 </p>
               </div>
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <Button asChild size="sm">
+                <Link href="/pricing">
+                  {user ? "Upgrade paket" : "Lihat paket"}
+                </Link>
+              </Button>
+              {!user && (
+                <Button asChild variant="outline" size="sm" className="bg-white">
+                  <Link href="/login">Masuk</Link>
+                </Button>
+              )}
             </div>
 
             {!user && (

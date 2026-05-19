@@ -19,6 +19,7 @@
    - Permissions-Policy
    - COOP
 2. **Rate limiting** per identity hash di `src/lib/security/rate-limit.ts`
+   - identity hash dibentuk dari request header yang dinormalisasi aman untuk `Request`, `Headers`, dan `ReadonlyHeaders` Next.js (`src/lib/security/request-identity.ts`)
 3. **Quota limiting**:
    - guest: 1 review / 24 jam
    - user free: 3 review / bulan (default)
@@ -44,14 +45,10 @@
 
 File: `src/app/api/review/[id]/route.ts`
 
-Saat ini endpoint delete belum memeriksa kepemilikan review.  
-UI memang menyembunyikan tombol berdasarkan konteks halaman, tapi endpoint tetap perlu authz check di server.
-
-Minimal yang disarankan:
-
+Status saat ini:
 - wajib login untuk delete
-- hanya owner review yang boleh delete
-- guest review sebaiknya tidak bisa di-delete dari endpoint publik tanpa token khusus
+- hanya owner review yang bisa delete
+- review milik user lain akan ditolak
 
 ### 2) CSP connect-src
 
