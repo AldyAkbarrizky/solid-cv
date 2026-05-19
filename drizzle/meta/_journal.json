@@ -50,6 +50,13 @@
       "when": 1779166539712,
       "tag": "0006_cheerful_mentallo",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779172144633,
+      "tag": "0007_milky_fantastic_four",
+      "breakpoints": true
     }
   ]
 }

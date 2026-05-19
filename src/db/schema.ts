@@ -136,4 +136,28 @@ export const paymentOrders = pgTable(
   ],
 );
 
+export const adminAuditLogs = pgTable(
+  "admin_audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    adminUserId: text("admin_user_id").notNull(),
+    adminEmail: varchar("admin_email", { length: 255 }).notNull(),
+
+    action: varchar("action", { length: 120 }).notNull(),
+
+    entityType: varchar("entity_type", { length: 80 }).notNull(),
+    entityId: text("entity_id").notNull(),
+
+    metadata: jsonb("metadata"),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("admin_audit_logs_admin_email_idx").on(table.adminEmail),
+    index("admin_audit_logs_entity_idx").on(table.entityType, table.entityId),
+    index("admin_audit_logs_created_at_idx").on(table.createdAt),
+  ],
+);
+
 export * from "./auth-schema";

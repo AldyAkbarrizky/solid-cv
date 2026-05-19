@@ -18,6 +18,7 @@ import {
   paymentOrders,
   reviewUsageEvents,
   userEntitlements,
+  adminAuditLogs,
 } from "@/db/schema";
 import { getCurrentAdminUser } from "@/lib/admin";
 import { CheckPaymentStatusButton } from "./check-payment-status-button";
@@ -79,6 +80,7 @@ export default async function AdminPage() {
     latestPayments,
     latestEntitlements,
     latestReviews,
+    latestAuditLogs,
   ] = await Promise.all([
     db
       .select({
@@ -126,6 +128,12 @@ export default async function AdminPage() {
       .limit(10),
 
     db.select().from(cvReviews).orderBy(desc(cvReviews.createdAt)).limit(10),
+
+    db
+      .select()
+      .from(adminAuditLogs)
+      .orderBy(desc(adminAuditLogs.createdAt))
+      .limit(20),
   ]);
 
   const paymentStats = paymentSummary[0];
@@ -460,6 +468,81 @@ export default async function AdminPage() {
                           className="px-5 py-8 text-center text-slate-500"
                         >
                           Belum ada review.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-0">
+              <div className="border-b p-5">
+                <h2 className="text-xl font-semibold text-slate-950">
+                  Admin Audit Log
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Catatan aktivitas admin yang memengaruhi data billing,
+                  payment, atau entitlement.
+                </p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-230 text-sm">
+                  <thead className="border-b bg-slate-50 text-left text-xs uppercase tracking-[0.12em] text-slate-500">
+                    <tr>
+                      <th className="px-5 py-3">Time</th>
+                      <th className="px-5 py-3">Admin</th>
+                      <th className="px-5 py-3">Action</th>
+                      <th className="px-5 py-3">Entity</th>
+                      <th className="px-5 py-3">Metadata</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y">
+                    {latestAuditLogs.map((log) => (
+                      <tr key={log.id}>
+                        <td className="px-5 py-4 text-slate-600">
+                          {formatDate(log.createdAt)}
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <p className="font-medium text-slate-950">
+                            {log.adminEmail}
+                          </p>
+                          <p className="mt-1 break-all text-xs text-muted-foreground">
+                            {log.adminUserId}
+                          </p>
+                        </td>
+
+                        <td className="px-5 py-4 font-medium text-slate-950">
+                          {log.action}
+                        </td>
+
+                        <td className="px-5 py-4 text-slate-600">
+                          <p>{log.entityType}</p>
+                          <p className="mt-1 break-all text-xs text-muted-foreground">
+                            {log.entityId}
+                          </p>
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <pre className="max-w-90 overflow-x-auto rounded-md bg-slate-50 p-3 text-xs leading-5 text-slate-700">
+                            {JSON.stringify(log.metadata, null, 2)}
+                          </pre>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {latestAuditLogs.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-5 py-8 text-center text-slate-500"
+                        >
+                          Belum ada aktivitas admin.
                         </td>
                       </tr>
                     )}

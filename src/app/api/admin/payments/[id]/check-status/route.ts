@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { paymentOrders } from "@/db/schema";
 import { getCurrentAdminUser } from "@/lib/admin";
 import { syncPaymentOrderWithDuitku } from "@/lib/billing/payment-sync";
+import { writeAdminAuditLog } from "@/lib/admin-audit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,6 +43,21 @@ export async function POST(
     }
 
     const result = await syncPaymentOrderWithDuitku(order.merchantOrderId);
+
+    await writeAdminAuditLog({
+      adminUserId: admin.id,
+      adminEmail: admin.email || "unknown",
+      action: "payment.check_duitku_status",
+      entityType: "payment_order",
+      entityId: order.id,
+      metadata: {
+        merchantOrderId: order.merchantOrderId,
+        previousStatus: result.previousStatus,
+        currentStatus: result.currentStatus,
+        duitkuStatusCode: result.duitkuStatusCode,
+        duitkuStatusMessage: result.duitkuStatusMessage,
+      },
+    });
 
     return NextResponse.json({
       message: "Status pembayaran berhasil diperbarui.",
