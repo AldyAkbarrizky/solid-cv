@@ -20,6 +20,7 @@ Saat ini ada dua plan:
 Halaman yang memakai plan:
 
 - `/pricing`
+- `/` bagian Paket
 - `POST /api/billing/checkout`
 
 ## Checkout
@@ -98,16 +99,18 @@ Saat payment berhasil:
 
 Data entitlement disimpan di tabel `user_entitlements`.
 
-## Billing page
+## Status paket dan kuota
 
-Route: `/billing`
+Route utama: `/pricing`
 
 Fungsi:
 
 - menampilkan paket aktif user
-- menampilkan kuota plan
-- menampilkan tanggal berlaku sampai
-- mengarahkan user ke `/pricing` jika belum punya paket berbayar
+- menampilkan kuota, pemakaian, dan sisa review
+- menampilkan tanggal pembaruan kuota
+- menampilkan pilihan paket dan tabel perbandingan
+
+Route `/billing` masih ada, tetapi hanya redirect ke `/pricing` supaya link lama tidak error.
 
 ## Return page
 
@@ -164,4 +167,3 @@ Data yang dicatat:
 - Jangan expose `DUITKU_API_KEY` ke public env.
 - Admin route memakai `notFound()` untuk user non-admin supaya tidak terlalu eksplisit.
 - Untuk rekonsiliasi pembayaran, gunakan admin detail page dan tombol `Check Duitku`.
-

@@ -6,15 +6,18 @@ import { Loader2, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 type LogoutButtonProps = {
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
 };
 
 export function LogoutButton({
   variant = "outline",
   size = "sm",
+  className,
 }: LogoutButtonProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +44,7 @@ export function LogoutButton({
       type="button"
       variant={variant}
       size={size}
-      className="bg-white"
+      className={cn("bg-white", className)}
       onClick={handleLogout}
       disabled={isLoading}
     >

@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
+  CreditCard,
   FileText,
   LockKeyhole,
   SearchCheck,
@@ -15,6 +16,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/layout/site-header";
+import {
+  pricingComparisonRows,
+  publicPricingPlans,
+} from "@/lib/billing/pricing-display";
 
 const reviewAreas = [
   {
@@ -378,6 +383,113 @@ export default function Home() {
             </p>
           </CardContent>
         </Card>
+      </section>
+
+      <section
+        id="pricing"
+        className="reveal reveal-delay-1 mx-auto w-full max-w-6xl px-5 py-10 md:py-12"
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
+              Paket
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+              Mulai gratis, tambah kuota saat butuh iterasi lebih banyak.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              Semua paket memakai format review yang sama. Perbedaannya ada
+              pada kuota, periode penggunaan, dan apakah hasil tersimpan di
+              akun.
+            </p>
+          </div>
+
+          <Button asChild variant="outline" className="w-full bg-white md:w-auto">
+            <Link href="/pricing">
+              Lihat detail paket
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {publicPricingPlans.map((plan) => (
+            <Card
+              key={plan.code}
+              className={
+                plan.highlighted
+                  ? "micro-lift rounded-lg border-primary/55 bg-primary/10 shadow-lg shadow-primary/10"
+                  : "micro-lift rounded-lg border-slate-200 bg-white shadow-sm"
+              }
+            >
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-primary">
+                      {plan.name}
+                    </p>
+                    <p className="mt-3 flex items-end gap-1">
+                      <span className="text-3xl font-semibold tracking-tight text-slate-950">
+                        {plan.price}
+                      </span>
+                      <span className="pb-1 text-xs text-muted-foreground">
+                        {plan.period}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-md bg-secondary text-primary">
+                    <CreditCard className="h-4 w-4" />
+                  </div>
+                </div>
+
+                <p className="mt-4 text-sm leading-6 text-slate-600">
+                  {plan.description}
+                </p>
+                <div className="mt-4 rounded-lg border bg-slate-50 p-3">
+                  <p className="text-sm font-semibold text-slate-950">
+                    {plan.quota}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="mt-6 overflow-x-auto rounded-lg border bg-white">
+          <table className="w-full min-w-[760px] border-separate border-spacing-0 text-left text-sm">
+            <thead>
+              <tr className="text-muted-foreground">
+                <th className="border-b px-4 py-3 font-medium">Fitur</th>
+                <th className="border-b px-4 py-3 font-medium">Guest</th>
+                <th className="border-b px-4 py-3 font-medium">Free</th>
+                <th className="border-b px-4 py-3 font-medium">Basic</th>
+                <th className="border-b px-4 py-3 font-medium">Pro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pricingComparisonRows.map((row) => (
+                <tr key={row.feature}>
+                  <td className="border-b px-4 py-4 font-medium text-slate-950">
+                    {row.feature}
+                  </td>
+                  <td className="border-b px-4 py-4 text-slate-600">
+                    {row.guest}
+                  </td>
+                  <td className="border-b px-4 py-4 text-slate-600">
+                    {row.free}
+                  </td>
+                  <td className="border-b px-4 py-4 text-slate-600">
+                    {row.basic}
+                  </td>
+                  <td className="border-b px-4 py-4 text-slate-600">
+                    {row.pro}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="reveal reveal-delay-2 mx-auto w-full max-w-6xl px-5 py-8 md:py-10">

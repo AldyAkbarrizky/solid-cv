@@ -21,6 +21,7 @@
   - API route: `/api/cv/analyze`, `/api/review/[id]`, `/api/auth/[...all]`, `/api/billing/*`, `/api/admin/*`
 - `src/lib/ai`: prompt, schema hasil AI, dan client AI
 - `src/lib/billing`: plan, invoice Duitku, dan sinkronisasi status pembayaran
+- `src/lib/billing/pricing-display.ts`: data tampilan paket untuk home dan pricing
 - `src/lib/cv`: ekstraksi teks CV + masking PII
 - `src/lib/security`: rate-limit + identity hashing
 - `src/lib/quota`: logika kuota guest/user dan entitlement paket
@@ -52,6 +53,7 @@
 - User login mendapat kuota free default.
 - User yang membeli paket berbayar mendapat entitlement baru melalui `upsertUserEntitlement`.
 - Status kuota dibaca di halaman `/review` melalui `getReviewQuotaStatus`.
+- Status paket dan kuota juga ditampilkan di `/pricing`; route `/billing` hanya redirect ke `/pricing`.
 
 File utama:
 
@@ -100,10 +102,18 @@ Perilaku saat ini:
 
 ## Route non-review
 
-- `/pricing`: daftar paket berbayar.
-- `/billing`: status paket dan kuota akun.
+- `/pricing`: daftar paket, tabel perbandingan, status paket, dan kuota akun.
+- `/billing`: redirect ke `/pricing` agar link lama tetap aman.
 - `/billing/return`: halaman setelah user kembali dari Duitku.
 - `/admin`: dashboard admin lite.
 - `/admin/payments/[id]`: detail order, entitlement, usage, review, dan audit log user terkait.
 - `/privacy`, `/terms`, `/contact`: halaman legal dan kontak.
 - `/robots.txt` dan `/sitemap.xml`: dibuat dari `src/app/robots.ts` dan `src/app/sitemap.ts`.
+
+## Catatan UI dan layout
+
+- Header global ada di `src/components/layout/site-header.tsx`.
+- Header memakai posisi `fixed` dengan spacer `h-16`, supaya tetap di atas saat halaman discroll tanpa menutup konten pertama.
+- Brand di header memakai wordmark ringkas `SolidCV` + label `Review`, bukan subtitle dua baris.
+- Jika user login dengan Google dan field `user.image` berasal dari `lh3.googleusercontent.com`, header menampilkan avatar user sebagai tombol menu akun. Jika tidak ada image yang valid, fallback memakai inisial nama/email.
+- Remote image Google diizinkan di `next.config.ts` melalui `images.remotePatterns`.
