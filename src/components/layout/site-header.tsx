@@ -1,11 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, History, LogIn, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  History,
+  LogIn,
+  Sparkles,
+  ShieldCheck,
+  CreditCard,
+} from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { CreditCard } from "lucide-react";
+import { isCurrentUserAdmin } from "@/lib/admin";
 
 type SiteHeaderProps = {
   variant?: "home" | "app";
@@ -29,6 +36,7 @@ export async function SiteHeader({
 }: SiteHeaderProps) {
   const user = await getCurrentUser();
   const isLoggedIn = Boolean(user);
+  const isAdmin = await isCurrentUserAdmin();
 
   return (
     <header className="border-b bg-background/95">
@@ -94,6 +102,19 @@ export async function SiteHeader({
 
           {isLoggedIn ? (
             <>
+              {isAdmin && (
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="hidden bg-white md:inline-flex"
+                >
+                  <Link href="/admin">
+                    <ShieldCheck className="mr-1.5 h-4 w-4" />
+                    Admin
+                  </Link>
+                </Button>
+              )}
               <Button
                 asChild
                 variant="outline"

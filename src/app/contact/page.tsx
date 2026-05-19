@@ -4,8 +4,9 @@ import { Mail, ShieldCheck, Trash2 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { supportEmail, companyName } from "@/lib/contact";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Kontak - Solid CV",
   description:
     "Hubungi Solid CV untuk bantuan, privasi, penghapusan data, dan pertanyaan pembayaran.",

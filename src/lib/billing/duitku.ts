@@ -25,11 +25,12 @@ type DuitkuCreateInvoiceResponse = {
 };
 
 type DuitkuTransactionStatusResponse = {
-  merchantOrderId: string;
-  reference: string;
-  amount: string;
-  statusCode: string;
-  statusMessage: string;
+  merchantCode?: string;
+  merchantOrderId?: string;
+  reference?: string;
+  amount?: string;
+  statusCode?: string;
+  statusMessage?: string;
 };
 
 function getDuitkuConfig() {
@@ -145,7 +146,7 @@ export async function createDuitkuInvoice({
 export async function checkDuitkuTransactionStatus(merchantOrderId: string) {
   const { env, merchantCode, apiKey } = getDuitkuConfig();
 
-  const baseUrl =
+  const endpoint =
     env === "production"
       ? "https://passport.duitku.com/webapi/api/merchant/transactionStatus"
       : "https://sandbox.duitku.com/webapi/api/merchant/transactionStatus";
@@ -159,7 +160,7 @@ export async function checkDuitkuTransactionStatus(merchantOrderId: string) {
   formData.append("merchantOrderId", merchantOrderId);
   formData.append("signature", signature);
 
-  const response = await fetch(baseUrl, {
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",

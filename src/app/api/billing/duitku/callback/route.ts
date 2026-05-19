@@ -7,6 +7,7 @@ import { createDuitkuCallbackSignature } from "@/lib/billing/duitku";
 import { getBillingPlan } from "@/lib/billing/plans";
 import { upsertUserEntitlement } from "@/lib/quota/entitlements";
 import { checkDuitkuTransactionStatus } from "@/lib/billing/duitku";
+import { syncPaymentOrderWithDuitku } from "@/lib/billing/payment-sync";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,50 +72,7 @@ export async function POST(request: Request) {
     }
 
     if (resultCode === "00") {
-      const transactionStatus =
-        await checkDuitkuTransactionStatus(merchantOrderId);
-
-      if (transactionStatus.statusCode !== "00") {
-        await db
-          .update(paymentOrders)
-          .set({
-            status: "pending",
-            duitkuReference: reference,
-            resultCode,
-            updatedAt: new Date(),
-          })
-          .where(eq(paymentOrders.id, order.id));
-
-        return NextResponse.json({ message: "OK" });
-      }
-
-      const plan = getBillingPlan(order.planCode);
-
-      if (!plan) {
-        return NextResponse.json(
-          { message: "Plan not found" },
-          { status: 400 },
-        );
-      }
-
-      await db
-        .update(paymentOrders)
-        .set({
-          status: "paid",
-          duitkuReference: reference,
-          resultCode,
-          paidAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(paymentOrders.id, order.id));
-
-      await upsertUserEntitlement({
-        userId: order.userId,
-        planCode: plan.code,
-        reviewQuotaLimit: plan.reviewQuotaLimit,
-        activeDays: plan.activeDays,
-      });
-
+      await syncPaymentOrderWithDuitku(merchantOrderId);
       return NextResponse.json({ message: "OK" });
     }
 
