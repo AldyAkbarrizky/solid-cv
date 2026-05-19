@@ -56,7 +56,7 @@ export function CheckoutButton({ planCode, disabled }: CheckoutButtonProps) {
           Membuat pembayaran
         </>
       ) : (
-        "Bayar dengan Duitku"
+        "Bayar"
       )}
     </Button>
   );
