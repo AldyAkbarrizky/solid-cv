@@ -100,6 +100,7 @@ Dokumentasi teknis ada di folder `docs/`:
 - `docs/billing-and-admin.md`
 - `docs/security-privacy-ops.md`
 - `docs/admin-sop.md`
+- `docs/changelog.md`
 
 Mulai dari `docs/README.md` untuk urutan bacanya.
 
@@ -109,17 +110,21 @@ Mulai dari `docs/README.md` untuk urutan bacanya.
 - Ekstraksi teks CV dengan `pdf-parse@1.x` (custom renderer untuk spasi akurat) dan `mammoth`.
 - Masking PII dasar sebelum teks dikirim ke AI.
 - Review CV berbasis Groq dengan output JSON tervalidasi Zod.
+- Loading state untuk halaman hasil review, riwayat, dan pricing.
 - Riwayat review untuk user login.
+- Hasil review bisa disalin linknya, dibagikan, dan diunduh sebagai Markdown.
 - Guest mode dengan kuota 1 review per 24 jam.
 - Free login dengan kuota 15 review per bulan.
 - Paket berbayar `paid_basic` dan `paid_pro`.
 - Halaman pricing dengan status paket/kuota akun dan tabel perbandingan paket.
+- Warning kuota hampir habis di halaman review dan pricing.
 - CTA upgrade paket tersedia di header, halaman review, dan halaman riwayat.
 - Checkout Duitku, callback validation, dan activation entitlement.
 - Halaman return pembayaran dengan status real-time (paid/pending/failed) + auto-refresh.
 - Admin dashboard untuk melihat payment order, entitlement, usage, review, dan audit log.
 - Cleanup job otomatis (Vercel Cron) untuk hapus review dan rate-limit data yang expired.
 - Privacy Policy, Terms of Service, Contact, robots, dan sitemap.
+- Metadata SEO dasar untuk halaman publik dan sitemap yang memuat halaman publik utama.
 
 ## Catatan Penting
 

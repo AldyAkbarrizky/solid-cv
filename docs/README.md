@@ -9,14 +9,18 @@ Urutan baca yang disarankan:
 3. [Billing & Admin](./billing-and-admin.md)
 4. [Security, Privacy, dan Operasional](./security-privacy-ops.md)
 5. [Admin SOP](./admin-sop.md) — prosedur operasional: tambah admin, cek order, rekonsiliasi, rollback
+6. [Changelog](./changelog.md)
 
 Kalau butuh konteks cepat:
 
 - Entry UI utama: `src/app/page.tsx`
 - Header global: `src/components/layout/site-header.tsx`
 - Halaman form review: `src/app/review/page.tsx`
+- Halaman hasil review: `src/app/review/[id]/page.tsx`
+- Aksi hasil review: `src/app/review/[id]/review-result-actions.tsx`
 - Halaman pricing dan status kuota: `src/app/pricing/page.tsx`
 - CTA upgrade paket: header, panel kuota review, dan halaman riwayat
+- Loading state route: `src/app/review/[id]/loading.tsx`, `src/app/history/loading.tsx`, `src/app/pricing/loading.tsx`
 - API utama analisis CV: `src/app/api/cv/analyze/route.ts`
 - API checkout: `src/app/api/billing/checkout/route.ts`
 - Callback Duitku: `src/app/api/billing/duitku/callback/route.ts`
@@ -25,3 +29,4 @@ Kalau butuh konteks cepat:
 - Validasi env production: `src/lib/config/env.ts`
 - Cleanup cron job: `src/app/api/cleanup/expired-reviews/route.ts`
 - Konfigurasi Vercel cron: `vercel.json`
+- Sitemap dan robots: `src/app/sitemap.ts`, `src/app/robots.ts`

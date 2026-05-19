@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   ArrowRight,
   CheckCircle2,
@@ -20,6 +21,21 @@ import {
   pricingComparisonRows,
   publicPricingPlans,
 } from "@/lib/billing/pricing-display";
+
+export const metadata: Metadata = {
+  title: "Solid CV - Review CV Berbasis AI",
+  description:
+    "Analisis struktur CV, relevansi role, keterbacaan ATS, dan rekomendasi perbaikan sebelum melamar kerja.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Solid CV - Review CV Berbasis AI",
+    description:
+      "Upload CV, pilih posisi tujuan, dan dapatkan rekomendasi perbaikan yang bisa langsung diterapkan.",
+    url: "/",
+  },
+};
 
 const reviewAreas = [
   {

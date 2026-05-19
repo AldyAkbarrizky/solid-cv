@@ -96,6 +96,7 @@ Tabel auth (`user`, `session`, `account`, dst) ada di `src/db/auth-schema.ts`.
 ## Catatan rendering hasil review
 
 - Halaman hasil: `src/app/review/[id]/page.tsx`
+- Aksi hasil review: `src/app/review/[id]/review-result-actions.tsx`
 - Review akan `notFound()` jika:
   - ID tidak ada
   - review sudah expired
@@ -104,6 +105,7 @@ Tabel auth (`user`, `session`, `account`, dst) ada di `src/db/auth-schema.ts`.
 Perilaku saat ini:
 
 - Review guest (`userId = null`) bisa dibuka lewat URL sampai masa retensi habis.
+- Hasil review bisa disalin linknya, dibagikan lewat Web Share API jika tersedia, dan diunduh sebagai ringkasan Markdown.
 
 ## Route non-review
 
@@ -122,3 +124,6 @@ Perilaku saat ini:
 - Brand di header memakai wordmark ringkas `SolidCV` + label `Review`, bukan subtitle dua baris.
 - Jika user login dengan Google dan field `user.image` berasal dari `lh3.googleusercontent.com`, header menampilkan avatar user sebagai tombol menu akun. Jika tidak ada image yang valid, fallback memakai inisial nama/email.
 - Remote image Google diizinkan di `next.config.ts` melalui `images.remotePatterns`.
+- Loading state route tersedia untuk `/review/[id]`, `/history`, dan `/pricing`.
+- Halaman review dan pricing menampilkan peringatan saat kuota hampir habis atau sudah habis.
+- Metadata SEO dasar didefinisikan di `src/app/layout.tsx`, dengan metadata tambahan di `src/app/page.tsx` dan `src/app/pricing/page.tsx`.

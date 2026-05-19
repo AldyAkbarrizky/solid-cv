@@ -32,6 +32,12 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
     input: requestHeaders,
     userId: user?.id ?? null,
   });
+  const quotaLowThreshold = Math.max(1, Math.ceil(quotaStatus.limit * 0.2));
+  const isQuotaDepleted = quotaStatus.remaining === 0;
+  const isQuotaLow =
+    !isQuotaDepleted &&
+    quotaStatus.remaining < quotaStatus.limit &&
+    quotaStatus.remaining <= quotaLowThreshold;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -140,6 +146,35 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
                   }).format(quotaStatus.periodEnd)}
                   .
                 </p>
+
+                {(isQuotaLow || isQuotaDepleted) && (
+                  <Alert
+                    className={
+                      isQuotaDepleted
+                        ? "mt-3 border-rose-200 bg-rose-50/60"
+                        : "mt-3 border-amber-200 bg-amber-50/60"
+                    }
+                  >
+                    <AlertTriangle
+                      className={
+                        isQuotaDepleted
+                          ? "h-4 w-4 text-rose-700"
+                          : "h-4 w-4 text-amber-700"
+                      }
+                    />
+                    <AlertDescription
+                      className={
+                        isQuotaDepleted
+                          ? "text-sm leading-6 text-rose-800"
+                          : "text-sm leading-6 text-amber-800"
+                      }
+                    >
+                      {isQuotaDepleted
+                        ? "Kuota review sudah habis untuk periode ini."
+                        : "Kuota review hampir habis. Pertimbangkan upgrade jika masih perlu iterasi CV."}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </div>
 

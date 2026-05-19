@@ -23,6 +23,7 @@ import { isReviewExpired } from "@/lib/review/retention";
 import { DeleteReviewButton } from "./delete-review-button";
 import { getCurrentUser } from "@/lib/session";
 import { SiteHeader } from "@/components/layout/site-header";
+import { ReviewResultActions } from "./review-result-actions";
 
 type ReviewResultPageProps = {
   params: Promise<{
@@ -281,7 +282,18 @@ export default async function ReviewResultPage({
             </h1>
           </div>
 
-          {canDelete && <DeleteReviewButton reviewId={review.id} />}
+          <div className="flex flex-wrap gap-2">
+            <ReviewResultActions
+              targetRole={review.targetRole}
+              overallScore={result.overallScore}
+              summary={result.summary}
+              strengths={result.strengths}
+              weaknesses={result.weaknesses}
+              recommendations={result.recommendations}
+              nextActions={result.nextActions}
+            />
+            {canDelete && <DeleteReviewButton reviewId={review.id} />}
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[360px_1fr]">

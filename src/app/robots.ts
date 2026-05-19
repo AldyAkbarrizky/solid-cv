@@ -14,7 +14,6 @@ export default function robots(): MetadataRoute.Robots {
           "/review/",
           "/history",
           "/billing",
-          "/pricing",
           "/login",
         ],
       },

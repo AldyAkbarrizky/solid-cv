@@ -25,9 +25,14 @@ export const metadata: Metadata = {
   title: "Paket Review CV - Solid CV",
   description:
     "Pilih paket review CV untuk menambah kuota analisis CV di Solid CV.",
-  robots: {
-    index: false,
-    follow: false,
+  alternates: {
+    canonical: "/pricing",
+  },
+  openGraph: {
+    title: "Paket Review CV - Solid CV",
+    description:
+      "Bandingkan paket Free, Basic, dan Pro untuk review CV berbasis AI.",
+    url: "/pricing",
   },
 };
 
@@ -57,6 +62,12 @@ export default async function PricingPage() {
       ? Math.min(100, (quotaStatus.used / quotaStatus.limit) * 100)
       : 0;
   const hasActivePaidPlan = quotaStatus.planCode.startsWith("paid_");
+  const quotaLowThreshold = Math.max(1, Math.ceil(quotaStatus.limit * 0.2));
+  const isQuotaDepleted = quotaStatus.remaining === 0;
+  const isQuotaLow =
+    !isQuotaDepleted &&
+    quotaStatus.remaining < quotaStatus.limit &&
+    quotaStatus.remaining <= quotaLowThreshold;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -122,6 +133,20 @@ export default async function PricingPage() {
               <p className="mt-3 text-xs leading-5 text-muted-foreground">
                 Kuota diperbarui setelah {formatDate(quotaStatus.periodEnd)}.
               </p>
+
+              {(isQuotaLow || isQuotaDepleted) && (
+                <div
+                  className={
+                    isQuotaDepleted
+                      ? "mt-4 rounded-lg border border-rose-200 bg-rose-50/60 p-3 text-sm leading-6 text-rose-800"
+                      : "mt-4 rounded-lg border border-amber-200 bg-amber-50/60 p-3 text-sm leading-6 text-amber-800"
+                  }
+                >
+                  {isQuotaDepleted
+                    ? "Kuota periode ini sudah habis."
+                    : "Kuota hampir habis. Pilih paket berbayar jika masih perlu review tambahan."}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
