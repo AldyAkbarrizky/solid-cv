@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { cvReviews } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,11 +19,20 @@ export async function DELETE(
   context: DeleteReviewRouteContext,
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser?.id) {
+      return NextResponse.json(
+        { message: "Anda perlu login untuk menghapus hasil review." },
+        { status: 401 },
+      );
+    }
+
     const { id } = await context.params;
 
     const [deletedReview] = await db
       .delete(cvReviews)
-      .where(eq(cvReviews.id, id))
+      .where(and(eq(cvReviews.id, id), eq(cvReviews.userId, currentUser.id)))
       .returning({
         id: cvReviews.id,
       });

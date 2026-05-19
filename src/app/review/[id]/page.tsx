@@ -266,6 +266,7 @@ export default async function ReviewResultPage({
   const lowestSectionScores = [...sectionScoreEntries]
     .sort((a, b) => a.value - b.value)
     .slice(0, 2);
+  const canDelete = Boolean(currentUser?.id && review.userId === currentUser.id);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -280,7 +281,7 @@ export default async function ReviewResultPage({
             </h1>
           </div>
 
-          <DeleteReviewButton reviewId={review.id} />
+          {canDelete && <DeleteReviewButton reviewId={review.id} />}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[360px_1fr]">

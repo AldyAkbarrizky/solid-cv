@@ -1,4 +1,4 @@
-import { and, count, eq, gte } from "drizzle-orm";
+import { and, count, eq, gte, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { reviewAttempts } from "@/db/schema";
@@ -26,32 +26,40 @@ export async function checkReviewRateLimit(
 
   const windowStart = new Date(Date.now() - windowSeconds * 1000);
 
-  const [row] = await db
-    .select({
-      total: count(),
-    })
-    .from(reviewAttempts)
-    .where(
-      and(
-        eq(reviewAttempts.identityHash, identityHash),
-        eq(reviewAttempts.route, route),
-        gte(reviewAttempts.createdAt, windowStart),
-      ),
+  return db.transaction(async (tx) => {
+    const lockKey = `rate-limit:${route}:${identityHash}`;
+
+    await tx.execute(
+      sql`select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`,
     );
 
-  if ((row?.total || 0) >= maxRequests) {
+    const [row] = await tx
+      .select({
+        total: count(),
+      })
+      .from(reviewAttempts)
+      .where(
+        and(
+          eq(reviewAttempts.identityHash, identityHash),
+          eq(reviewAttempts.route, route),
+          gte(reviewAttempts.createdAt, windowStart),
+        ),
+      );
+
+    if ((row?.total || 0) >= maxRequests) {
+      return {
+        allowed: false,
+        retryAfterSeconds: windowSeconds,
+      };
+    }
+
+    await tx.insert(reviewAttempts).values({
+      identityHash,
+      route,
+    });
+
     return {
-      allowed: false,
-      retryAfterSeconds: windowSeconds,
+      allowed: true,
     };
-  }
-
-  await db.insert(reviewAttempts).values({
-    identityHash,
-    route,
   });
-
-  return {
-    allowed: true,
-  };
 }

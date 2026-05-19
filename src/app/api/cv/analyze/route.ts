@@ -11,8 +11,10 @@ import { checkReviewRateLimit } from "@/lib/security/rate-limit";
 import { getReviewExpiresAt } from "@/lib/review/retention";
 import { getCurrentUser } from "@/lib/session";
 import {
+  finalizeReservedReviewUsage,
   getReviewQuotaStatus,
-  recordReviewUsage,
+  releaseReservedReviewUsage,
+  reserveReviewQuota,
 } from "@/lib/quota/review-quota";
 
 export const runtime = "nodejs";
@@ -57,6 +59,9 @@ function detectFileKind(file: File, buffer: Buffer): "pdf" | "docx" | null {
 }
 
 export async function POST(request: Request) {
+  let reservedUsageEventId: string | null = null;
+  let createdReviewId: string | null = null;
+
   try {
     const rateLimit = await checkReviewRateLimit(request, {
       route: "/api/cv/analyze",
@@ -78,7 +83,6 @@ export async function POST(request: Request) {
     }
 
     const currentUser = await getCurrentUser();
-
     const quotaStatus = await getReviewQuotaStatus({
       input: request,
       userId: currentUser?.id ?? null,
@@ -183,6 +187,31 @@ export async function POST(request: Request) {
 
     const maskedText = maskPII(extractedText);
 
+    const quotaReservation = await reserveReviewQuota({
+      input: request,
+      userId: currentUser?.id ?? null,
+    });
+
+    if (!quotaReservation.allowed) {
+      return NextResponse.json(
+        {
+          message: currentUser
+            ? "Kuota review CV bulan ini sudah habis."
+            : "Kuota guest sudah habis. Masuk untuk mendapatkan kuota review tambahan.",
+          quota: {
+            planCode: quotaReservation.planCode,
+            limit: quotaReservation.limit,
+            used: quotaReservation.used,
+            remaining: quotaReservation.remaining,
+            periodEnd: quotaReservation.periodEnd,
+          },
+        },
+        { status: 403 },
+      );
+    }
+
+    reservedUsageEventId = quotaReservation.usageEventId ?? null;
+
     const aiResponse = await generateCVReview({
       cvText: maskedText,
       targetRole: parsedInput.data.targetRole,
@@ -206,17 +235,32 @@ export async function POST(request: Request) {
         id: cvReviews.id,
       });
 
-    await recordReviewUsage({
-      input: request,
-      userId: currentUser?.id ?? null,
-      reviewId: createdReview.id,
-      planCode: quotaStatus.planCode,
-    });
+    createdReviewId = createdReview.id;
+
+    if (reservedUsageEventId) {
+      await finalizeReservedReviewUsage({
+        usageEventId: reservedUsageEventId,
+        reviewId: createdReviewId,
+      });
+    }
 
     return NextResponse.json({
       reviewId: createdReview.id,
     });
   } catch (error) {
+    if (reservedUsageEventId && !createdReviewId) {
+      try {
+        await releaseReservedReviewUsage(reservedUsageEventId);
+      } catch (releaseError) {
+        console.error("REVIEW_QUOTA_RELEASE_ERROR", {
+          message:
+            releaseError instanceof Error
+              ? releaseError.message
+              : "Unknown error",
+        });
+      }
+    }
+
     console.error("CV_ANALYZE_ERROR", {
       message: error instanceof Error ? error.message : "Unknown error",
     });

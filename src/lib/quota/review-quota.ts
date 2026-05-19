@@ -1,4 +1,4 @@
-import { and, count, eq, gte, lt } from "drizzle-orm";
+import { and, count, eq, gte, lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { reviewUsageEvents, userEntitlements } from "@/db/schema";
@@ -18,6 +18,10 @@ type ReviewQuotaStatus = {
   periodEnd: Date;
   identityHash?: string;
   userId?: string;
+};
+
+type ReserveReviewQuotaResult = ReviewQuotaStatus & {
+  usageEventId?: string;
 };
 
 function getMonthPeriod(now = new Date()) {
@@ -173,24 +177,191 @@ export async function getReviewQuotaStatus({
   };
 }
 
-export async function recordReviewUsage({
+export async function reserveReviewQuota({
   input,
   userId,
-  reviewId,
-  planCode,
 }: {
   input: Request | Headers;
   userId?: string | null;
-  reviewId: string;
-  planCode: string;
-}) {
+}): Promise<ReserveReviewQuotaResult> {
+  const now = new Date();
   const identityHash = getRequestIdentityHash(input);
 
-  await db.insert(reviewUsageEvents).values({
-    userId: userId ?? null,
-    identityHash,
-    scope: userId ? "user" : "guest",
-    planCode,
-    reviewId,
+  if (!userId) {
+    const { periodStart, periodEnd } = getGuestPeriod(now);
+
+    return db.transaction(async (tx) => {
+      const lockKey = `quota:guest:${identityHash}`;
+
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`,
+      );
+
+      const [usedRow] = await tx
+        .select({
+          total: count(),
+        })
+        .from(reviewUsageEvents)
+        .where(
+          and(
+            eq(reviewUsageEvents.identityHash, identityHash),
+            eq(reviewUsageEvents.scope, "guest"),
+            gte(reviewUsageEvents.createdAt, periodStart),
+          ),
+        );
+
+      const used = usedRow?.total || 0;
+
+      const remaining = Math.max(GUEST_REVIEW_LIMIT - used, 0);
+
+      if (remaining <= 0) {
+        return {
+          allowed: false,
+          scope: "guest",
+          planCode: "guest",
+          limit: GUEST_REVIEW_LIMIT,
+          used,
+          remaining,
+          periodStart,
+          periodEnd,
+          identityHash,
+        };
+      }
+
+      const [usageEvent] = await tx
+        .insert(reviewUsageEvents)
+        .values({
+          userId: null,
+          identityHash,
+          scope: "guest",
+          planCode: "guest",
+          reviewId: null,
+        })
+        .returning({
+          id: reviewUsageEvents.id,
+        });
+
+      return {
+        allowed: true,
+        scope: "guest",
+        planCode: "guest",
+        limit: GUEST_REVIEW_LIMIT,
+        used: used + 1,
+        remaining: Math.max(GUEST_REVIEW_LIMIT - (used + 1), 0),
+        periodStart,
+        periodEnd,
+        identityHash,
+        usageEventId: usageEvent.id,
+      };
+    });
+  }
+
+  return db.transaction(async (tx) => {
+    const lockKey = `quota:user:${userId}`;
+
+    await tx.execute(
+      sql`select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`,
+    );
+
+    const [entitlement] = await tx
+      .select()
+      .from(userEntitlements)
+      .where(
+        and(
+          eq(userEntitlements.userId, userId),
+          eq(userEntitlements.status, "active"),
+        ),
+      )
+      .limit(1);
+    const defaultPeriod = getMonthPeriod(now);
+
+    const planCode = entitlement?.planCode || "free";
+    const limit = entitlement?.reviewQuotaLimit || FREE_USER_REVIEW_LIMIT;
+    const periodStart = entitlement?.currentPeriodStart || defaultPeriod.periodStart;
+    const periodEnd = entitlement?.currentPeriodEnd || defaultPeriod.periodEnd;
+
+    const isPeriodValid = periodEnd.getTime() > now.getTime();
+    const effectivePlanCode = isPeriodValid ? planCode : "free";
+    const effectiveLimit = isPeriodValid ? limit : FREE_USER_REVIEW_LIMIT;
+    const effectivePeriodStart = isPeriodValid
+      ? periodStart
+      : defaultPeriod.periodStart;
+    const effectivePeriodEnd = isPeriodValid ? periodEnd : defaultPeriod.periodEnd;
+
+    const [usedRow] = await tx
+      .select({
+        total: count(),
+      })
+      .from(reviewUsageEvents)
+      .where(
+        and(
+          eq(reviewUsageEvents.userId, userId),
+          gte(reviewUsageEvents.createdAt, effectivePeriodStart),
+          lt(reviewUsageEvents.createdAt, effectivePeriodEnd),
+        ),
+      );
+
+    const used = usedRow?.total || 0;
+
+    const remaining = Math.max(effectiveLimit - used, 0);
+
+    if (remaining <= 0) {
+      return {
+        allowed: false,
+        scope: "user",
+        planCode: effectivePlanCode,
+        limit: effectiveLimit,
+        used,
+        remaining,
+        periodStart: effectivePeriodStart,
+        periodEnd: effectivePeriodEnd,
+        userId,
+      };
+    }
+
+    const [usageEvent] = await tx
+      .insert(reviewUsageEvents)
+      .values({
+        userId,
+        identityHash,
+        scope: "user",
+        planCode: effectivePlanCode,
+        reviewId: null,
+      })
+      .returning({
+        id: reviewUsageEvents.id,
+      });
+
+    return {
+      allowed: true,
+      scope: "user",
+      planCode: effectivePlanCode,
+      limit: effectiveLimit,
+      used: used + 1,
+      remaining: Math.max(effectiveLimit - (used + 1), 0),
+      periodStart: effectivePeriodStart,
+      periodEnd: effectivePeriodEnd,
+      userId,
+      usageEventId: usageEvent.id,
+    };
   });
+}
+
+export async function finalizeReservedReviewUsage({
+  usageEventId,
+  reviewId,
+}: {
+  usageEventId: string;
+  reviewId: string;
+}) {
+  await db
+    .update(reviewUsageEvents)
+    .set({
+      reviewId,
+    })
+    .where(eq(reviewUsageEvents.id, usageEventId));
+}
+
+export async function releaseReservedReviewUsage(usageEventId: string) {
+  await db.delete(reviewUsageEvents).where(eq(reviewUsageEvents.id, usageEventId));
 }

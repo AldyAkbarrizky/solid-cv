@@ -122,20 +122,24 @@ summary {
 .bg-white,
 .bg-white\/70,
 .bg-white\/80,
-.bg-white\/90 {
+.bg-white\/90,
+[class~="bg-white/70"],
+[class~="bg-white/80"],
+[class~="bg-white/90"] {
     background-color: hsl(var(--card) / 0.88) !important;
 }
 
 .bg-slate-50,
 .bg-slate-50\/70,
 .bg-slate-100,
-.hover\:bg-slate-100:hover {
+[class~="bg-slate-50/70"] {
     background-color: hsl(var(--muted) / 0.82) !important;
 }
 
 .text-slate-950,
 .text-slate-900,
-.text-slate-800 {
+.text-slate-800,
+.text-black {
     color: hsl(var(--foreground)) !important;
 }
 
@@ -150,13 +154,16 @@ summary {
 
 .border-slate-200,
 .border-slate-200\/80,
-.border-slate-300 {
+.border-slate-300,
+[class~="border-slate-200/80"] {
     border-color: hsl(var(--border)) !important;
 }
 
 .bg-sky-50\/35,
 .bg-sky-50\/60,
-.bg-sky-100 {
+.bg-sky-100,
+[class~="bg-sky-50/35"],
+[class~="bg-sky-50/60"] {
     background-color: hsl(204 78% 20% / 0.58) !important;
 }
 
@@ -174,7 +181,8 @@ summary {
 .bg-emerald-50\/35,
 .bg-emerald-50\/70,
 .bg-emerald-100,
-.hover\:bg-emerald-100:hover {
+[class~="bg-emerald-50/35"],
+[class~="bg-emerald-50/70"] {
     background-color: hsl(158 62% 18% / 0.58) !important;
 }
 
@@ -192,7 +200,8 @@ summary {
 .bg-amber-50\/40,
 .bg-amber-50\/60,
 .bg-amber-100,
-.hover\:bg-amber-100:hover {
+[class~="bg-amber-50/40"],
+[class~="bg-amber-50/60"] {
     background-color: hsl(38 84% 17% / 0.58) !important;
 }
 
@@ -209,8 +218,8 @@ summary {
 .bg-rose-50\/40,
 .bg-rose-50\/60,
 .bg-rose-100,
-.hover\:bg-rose-50:hover,
-.hover\:bg-rose-100:hover {
+[class~="bg-rose-50/40"],
+[class~="bg-rose-50/60"] {
     background-color: hsl(347 72% 19% / 0.58) !important;
 }
 
@@ -223,7 +232,8 @@ summary {
     color: hsl(351 95% 78%) !important;
 }
 
-.bg-indigo-50\/70 {
+.bg-indigo-50\/70,
+[class~="bg-indigo-50/70"] {
     background-color: hsl(232 55% 20% / 0.58) !important;
 }
 
@@ -233,6 +243,28 @@ summary {
 
 .text-indigo-700 {
     color: hsl(226 95% 80%) !important;
+}
+
+.hover\:bg-slate-100:hover,
+[class~="hover:bg-slate-100"]:hover {
+    background-color: hsl(var(--muted) / 0.82) !important;
+}
+
+.hover\:bg-emerald-100:hover,
+[class~="hover:bg-emerald-100"]:hover {
+    background-color: hsl(158 62% 18% / 0.58) !important;
+}
+
+.hover\:bg-amber-100:hover,
+[class~="hover:bg-amber-100"]:hover {
+    background-color: hsl(38 84% 17% / 0.58) !important;
+}
+
+.hover\:bg-rose-50:hover,
+.hover\:bg-rose-100:hover,
+[class~="hover:bg-rose-50"]:hover,
+[class~="hover:bg-rose-100"]:hover {
+    background-color: hsl(347 72% 19% / 0.58) !important;
 }
 
 .prose {

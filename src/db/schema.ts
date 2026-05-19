@@ -9,27 +9,33 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const cvReviews = pgTable("cv_reviews", {
-  id: uuid("id").defaultRandom().primaryKey(),
+export const cvReviews = pgTable(
+  "cv_reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
 
-  userId: text("user_id"),
+    userId: text("user_id"),
 
-  targetRole: varchar("target_role", { length: 120 }).notNull(),
+    targetRole: varchar("target_role", { length: 120 }).notNull(),
 
-  overallScore: integer("overall_score").notNull(),
+    overallScore: integer("overall_score").notNull(),
 
-  resultJson: jsonb("result_json").notNull(),
+    resultJson: jsonb("result_json").notNull(),
 
-  aiProvider: varchar("ai_provider", { length: 50 }).notNull(),
-  aiModel: varchar("ai_model", { length: 100 }).notNull(),
+    aiProvider: varchar("ai_provider", { length: 50 }).notNull(),
+    aiModel: varchar("ai_model", { length: 100 }).notNull(),
 
-  inputTokens: integer("input_tokens"),
-  outputTokens: integer("output_tokens"),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
 
-  expiresAt: timestamp("expires_at"),
+    expiresAt: timestamp("expires_at"),
 
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("cv_reviews_user_created_at_idx").on(table.userId, table.createdAt),
+  ],
+);
 
 export const reviewAttempts = pgTable(
   "review_attempts",
