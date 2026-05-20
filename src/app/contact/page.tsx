@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { Mail, ShieldCheck, Trash2 } from "lucide-react";
+import { Mail, MapPin, Phone, ShieldCheck, Trash2 } from "lucide-react";
 
 import { SiteHeader } from "@/components/layout/site-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { supportEmail, companyName } from "@/lib/contact";
+import {
+  secondaryPaymentContact,
+  supportEmail,
+  companyName,
+} from "@/lib/contact";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -137,6 +141,36 @@ export default function ContactPage() {
                   {supportEmail}
                 </a>
               </p>
+              <p className="mt-1 flex items-start gap-2">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>
+                  {secondaryPaymentContact.address},{" "}
+                  {secondaryPaymentContact.subDistrict},{" "}
+                  {secondaryPaymentContact.district},{" "}
+                  {secondaryPaymentContact.city},{" "}
+                  {secondaryPaymentContact.province}{" "}
+                  {secondaryPaymentContact.postalCode}
+                </span>
+              </p>
+
+              <div className="mt-4 border-t pt-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  Secondary contact
+                </p>
+                <p>
+                  Email:{" "}
+                  <a
+                    href={`mailto:${secondaryPaymentContact.email}`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {secondaryPaymentContact.email}
+                  </a>
+                </p>
+                <p className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-primary" />
+                  <span>{secondaryPaymentContact.phone}</span>
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
