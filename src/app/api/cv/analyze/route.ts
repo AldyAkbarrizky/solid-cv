@@ -30,6 +30,56 @@ const analyzeRequestSchema = z.object({
   notes: z.string().trim().max(4000).optional().default(""),
 });
 
+type AnalyzeProgressEvent = {
+  type: "progress";
+  progress: number;
+  stage: string;
+  message: string;
+};
+
+type AnalyzeDoneEvent = {
+  type: "done";
+  progress: 100;
+  reviewId: string;
+};
+
+type AnalyzeErrorEvent = {
+  type: "error";
+  progress: number;
+  status: number;
+  message: string;
+  retryAfterSeconds?: number;
+};
+
+type AnalyzeStreamEvent =
+  | AnalyzeProgressEvent
+  | AnalyzeDoneEvent
+  | AnalyzeErrorEvent;
+
+type AnalyzeSuccessResult = {
+  reviewId: string;
+};
+
+class AnalyzeHttpError extends Error {
+  status: number;
+  responseBody: Record<string, unknown>;
+  responseHeaders?: Record<string, string>;
+
+  constructor(
+    status: number,
+    message: string,
+    options?: {
+      responseBody?: Record<string, unknown>;
+      responseHeaders?: Record<string, string>;
+    },
+  ) {
+    super(message);
+    this.status = status;
+    this.responseBody = options?.responseBody ?? { message };
+    this.responseHeaders = options?.responseHeaders;
+  }
+}
+
 function getFileExtension(filename: string) {
   return filename.split(".").pop()?.toLowerCase();
 }
@@ -60,29 +110,58 @@ function detectFileKind(file: File, buffer: Buffer): "pdf" | "docx" | null {
   return null;
 }
 
-export async function POST(request: Request) {
+function toErrorMessage(error: unknown) {
+  if (error instanceof AnalyzeHttpError) {
+    const rawMessage = error.responseBody.message;
+    return typeof rawMessage === "string" ? rawMessage : error.message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Gagal memproses CV. Coba beberapa saat lagi atau gunakan file lain.";
+}
+
+async function runAnalyzeCV(
+  request: Request,
+  onProgress?: (event: AnalyzeProgressEvent) => void,
+): Promise<AnalyzeSuccessResult> {
   let reservedUsageEventId: string | null = null;
   let createdReviewId: string | null = null;
 
+  const updateProgress = (
+    progress: number,
+    stage: string,
+    message: string,
+  ) => {
+    onProgress?.({ type: "progress", progress, stage, message });
+  };
+
   try {
+    updateProgress(6, "rate-limit", "Memeriksa batas percobaan.");
+
     const rateLimit = await checkReviewRateLimit(request, {
       route: "/api/cv/analyze",
     });
 
     if (!rateLimit.allowed) {
-      return NextResponse.json(
+      throw new AnalyzeHttpError(
+        429,
+        "Terlalu banyak percobaan review CV. Coba lagi beberapa saat lagi.",
         {
-          message:
-            "Terlalu banyak percobaan review CV. Coba lagi beberapa saat lagi.",
-        },
-        {
-          status: 429,
-          headers: {
+          responseBody: {
+            message:
+              "Terlalu banyak percobaan review CV. Coba lagi beberapa saat lagi.",
+          },
+          responseHeaders: {
             "Retry-After": String(rateLimit.retryAfterSeconds || 3600),
           },
         },
       );
     }
+
+    updateProgress(14, "quota-check", "Memeriksa kuota review.");
 
     const currentUser = await getCurrentUser();
     const quotaStatus = await getReviewQuotaStatus({
@@ -91,25 +170,31 @@ export async function POST(request: Request) {
     });
 
     if (!quotaStatus.allowed) {
-      return NextResponse.json(
+      throw new AnalyzeHttpError(
+        403,
+        currentUser
+          ? "Kuota review CV bulan ini sudah habis."
+          : "Kuota guest sudah habis. Masuk untuk mendapatkan kuota review tambahan.",
         {
-          message: currentUser
-            ? "Kuota review CV bulan ini sudah habis."
-            : "Kuota guest sudah habis. Masuk untuk mendapatkan kuota review tambahan.",
-          quota: {
-            planCode: quotaStatus.planCode,
-            limit: quotaStatus.limit,
-            used: quotaStatus.used,
-            remaining: quotaStatus.remaining,
-            periodEnd: quotaStatus.periodEnd,
+          responseBody: {
+            message: currentUser
+              ? "Kuota review CV bulan ini sudah habis."
+              : "Kuota guest sudah habis. Masuk untuk mendapatkan kuota review tambahan.",
+            quota: {
+              planCode: quotaStatus.planCode,
+              limit: quotaStatus.limit,
+              used: quotaStatus.used,
+              remaining: quotaStatus.remaining,
+              periodEnd: quotaStatus.periodEnd,
+            },
           },
         },
-        { status: 403 },
       );
     }
 
-    const formData = await request.formData();
+    updateProgress(22, "form-parse", "Membaca data upload.");
 
+    const formData = await request.formData();
     const cvEntry = formData.get("cv");
     const targetRole = formData.get("targetRole");
     const jobRequirement = formData.get("jobRequirement") ?? "";
@@ -125,74 +210,61 @@ export async function POST(request: Request) {
       const fieldErrors = parsedInput.error.flatten().fieldErrors;
 
       if (fieldErrors.targetRole?.length) {
-        return NextResponse.json(
-          {
-            message:
-              "Posisi tujuan tidak valid. Isi minimal 3 karakter dan maksimal 120 karakter.",
-          },
-          { status: 400 },
+        throw new AnalyzeHttpError(
+          400,
+          "Posisi tujuan tidak valid. Isi minimal 3 karakter dan maksimal 120 karakter.",
         );
       }
 
       if (fieldErrors.jobRequirement?.length) {
-        return NextResponse.json(
-          {
-            message:
-              "Requirement pekerjaan terlalu panjang. Maksimal 4000 karakter.",
-          },
-          { status: 400 },
+        throw new AnalyzeHttpError(
+          400,
+          "Requirement pekerjaan terlalu panjang. Maksimal 4000 karakter.",
         );
       }
 
       if (fieldErrors.notes?.length) {
-        return NextResponse.json(
-          {
-            message: "Catatan tambahan terlalu panjang. Maksimal 4000 karakter.",
-          },
-          { status: 400 },
+        throw new AnalyzeHttpError(
+          400,
+          "Catatan tambahan terlalu panjang. Maksimal 4000 karakter.",
         );
       }
 
-      return NextResponse.json(
-        {
-          message: "Input tidak valid. Periksa kembali data yang Anda isi.",
-        },
-        { status: 400 },
+      throw new AnalyzeHttpError(
+        400,
+        "Input tidak valid. Periksa kembali data yang Anda isi.",
       );
     }
 
     if (!(cvEntry instanceof File)) {
-      return NextResponse.json(
-        { message: "File CV wajib diunggah." },
-        { status: 400 },
-      );
+      throw new AnalyzeHttpError(400, "File CV wajib diunggah.");
     }
 
     if (cvEntry.size <= 0) {
-      return NextResponse.json({ message: "File CV kosong." }, { status: 400 });
+      throw new AnalyzeHttpError(400, "File CV kosong.");
     }
 
     if (cvEntry.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { message: "Ukuran file melebihi batas maksimal 3 MB." },
-        { status: 400 },
+      throw new AnalyzeHttpError(
+        400,
+        "Ukuran file melebihi batas maksimal 3 MB.",
       );
     }
+
+    updateProgress(32, "file-validate", "Memvalidasi format file.");
 
     const arrayBuffer = await cvEntry.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-
     const fileKind = detectFileKind(cvEntry, buffer);
 
     if (!fileKind) {
-      return NextResponse.json(
-        {
-          message:
-            "Format file tidak valid. Gunakan PDF atau DOCX asli, bukan file yang hanya diganti ekstensinya.",
-        },
-        { status: 400 },
+      throw new AnalyzeHttpError(
+        400,
+        "Format file tidak valid. Gunakan PDF atau DOCX asli, bukan file yang hanya diganti ekstensinya.",
       );
     }
+
+    updateProgress(46, "extract-text", "Mengekstrak teks dari CV.");
 
     const extractedText = await extractTextFromCV({
       buffer,
@@ -204,26 +276,24 @@ export async function POST(request: Request) {
         charCount: extractedText?.length ?? 0,
         fileKind,
       });
-      return NextResponse.json(
-        {
-          message:
-            "Teks CV terlalu sedikit atau tidak berhasil dibaca. Pastikan file tidak berupa hasil scan gambar.",
-        },
-        { status: 400 },
+
+      throw new AnalyzeHttpError(
+        400,
+        "Teks CV terlalu sedikit atau tidak berhasil dibaca. Pastikan file tidak berupa hasil scan gambar.",
       );
     }
 
     if (extractedText.length > MAX_EXTRACTED_TEXT_CHARS) {
-      return NextResponse.json(
-        {
-          message:
-            "Isi CV terlalu panjang untuk dianalisis pada versi awal. Gunakan CV yang lebih ringkas, maksimal sekitar 3-5 halaman.",
-        },
-        { status: 400 },
+      throw new AnalyzeHttpError(
+        400,
+        "Isi CV terlalu panjang untuk dianalisis pada versi awal. Gunakan CV yang lebih ringkas, maksimal sekitar 3-5 halaman.",
       );
     }
 
+    updateProgress(56, "mask-pii", "Melakukan masking data sensitif.");
     const maskedText = maskPII(extractedText);
+
+    updateProgress(66, "quota-reserve", "Mengunci kuota review.");
 
     const quotaReservation = await reserveReviewQuota({
       input: request,
@@ -231,24 +301,31 @@ export async function POST(request: Request) {
     });
 
     if (!quotaReservation.allowed) {
-      return NextResponse.json(
+      throw new AnalyzeHttpError(
+        403,
+        currentUser
+          ? "Kuota review CV bulan ini sudah habis."
+          : "Kuota guest sudah habis. Masuk untuk mendapatkan kuota review tambahan.",
         {
-          message: currentUser
-            ? "Kuota review CV bulan ini sudah habis."
-            : "Kuota guest sudah habis. Masuk untuk mendapatkan kuota review tambahan.",
-          quota: {
-            planCode: quotaReservation.planCode,
-            limit: quotaReservation.limit,
-            used: quotaReservation.used,
-            remaining: quotaReservation.remaining,
-            periodEnd: quotaReservation.periodEnd,
+          responseBody: {
+            message: currentUser
+              ? "Kuota review CV bulan ini sudah habis."
+              : "Kuota guest sudah habis. Masuk untuk mendapatkan kuota review tambahan.",
+            quota: {
+              planCode: quotaReservation.planCode,
+              limit: quotaReservation.limit,
+              used: quotaReservation.used,
+              remaining: quotaReservation.remaining,
+              periodEnd: quotaReservation.periodEnd,
+            },
           },
         },
-        { status: 403 },
       );
     }
 
     reservedUsageEventId = quotaReservation.usageEventId ?? null;
+
+    updateProgress(80, "ai-review", "Menganalisis CV dengan AI.");
 
     const aiResponse = await generateCVReview({
       cvText: maskedText,
@@ -257,12 +334,15 @@ export async function POST(request: Request) {
       notes: parsedInput.data.notes,
     });
 
+    updateProgress(90, "save-review", "Menyimpan hasil review.");
+
     const [createdReview] = await db
       .insert(cvReviews)
       .values({
         userId: currentUser?.id ?? null,
         targetRole: parsedInput.data.targetRole,
         jobRequirement: parsedInput.data.jobRequirement || null,
+        cvSourceMaskedText: maskedText,
         overallScore: aiResponse.result.overallScore,
         resultJson: aiResponse.result,
         aiProvider: aiResponse.provider,
@@ -278,15 +358,18 @@ export async function POST(request: Request) {
     createdReviewId = createdReview.id;
 
     if (reservedUsageEventId) {
+      updateProgress(96, "quota-finalize", "Menyelesaikan pencatatan kuota.");
       await finalizeReservedReviewUsage({
         usageEventId: reservedUsageEventId,
         reviewId: createdReviewId,
       });
     }
 
-    return NextResponse.json({
+    updateProgress(100, "done", "Analisis selesai.");
+
+    return {
       reviewId: createdReview.id,
-    });
+    };
   } catch (error) {
     if (reservedUsageEventId && !createdReviewId) {
       try {
@@ -294,6 +377,104 @@ export async function POST(request: Request) {
       } catch (releaseError) {
         captureError("REVIEW_QUOTA_RELEASE_ERROR", releaseError);
       }
+    }
+
+    if (error instanceof AnalyzeHttpError) {
+      throw error;
+    }
+
+    captureError("CV_ANALYZE_ERROR", error);
+    throw new AnalyzeHttpError(
+      500,
+      "Gagal memproses CV. Coba beberapa saat lagi atau gunakan file lain.",
+    );
+  }
+}
+
+function jsonErrorResponse(error: AnalyzeHttpError) {
+  return NextResponse.json(error.responseBody, {
+    status: error.status,
+    headers: error.responseHeaders,
+  });
+}
+
+function streamAnalyzeResponse(request: Request) {
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      const emit = (event: AnalyzeStreamEvent) => {
+        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+      };
+
+      void (async () => {
+        try {
+          emit({
+            type: "progress",
+            progress: 2,
+            stage: "start",
+            message: "Menyiapkan analisis CV.",
+          });
+
+          const result = await runAnalyzeCV(request, (event) => emit(event));
+
+          emit({
+            type: "done",
+            progress: 100,
+            reviewId: result.reviewId,
+          });
+        } catch (error) {
+          const status = error instanceof AnalyzeHttpError ? error.status : 500;
+          const retryAfterRaw =
+            error instanceof AnalyzeHttpError
+              ? error.responseHeaders?.["Retry-After"]
+              : undefined;
+          const retryAfterSeconds = retryAfterRaw
+            ? Number.parseInt(retryAfterRaw, 10)
+            : undefined;
+
+          emit({
+            type: "error",
+            progress: 100,
+            status,
+            message: toErrorMessage(error),
+            retryAfterSeconds:
+              Number.isFinite(retryAfterSeconds) && retryAfterSeconds
+                ? retryAfterSeconds
+                : undefined,
+          });
+        } finally {
+          controller.close();
+        }
+      })();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "no-store, no-transform",
+      Connection: "keep-alive",
+    },
+  });
+}
+
+export async function POST(request: Request) {
+  const isStreamMode = new URL(request.url).searchParams.get("stream") === "1";
+
+  if (isStreamMode) {
+    return streamAnalyzeResponse(request);
+  }
+
+  try {
+    const result = await runAnalyzeCV(request);
+
+    return NextResponse.json({
+      reviewId: result.reviewId,
+    });
+  } catch (error) {
+    if (error instanceof AnalyzeHttpError) {
+      return jsonErrorResponse(error);
     }
 
     captureError("CV_ANALYZE_ERROR", error);

@@ -1,7 +1,18 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, FileUp, Loader2, X } from "lucide-react";
+import { FormEvent, useMemo, useRef, useState } from "react";
+import {
+  AlertCircle,
+  Bold,
+  CheckCircle2,
+  FileUp,
+  Heading2,
+  List,
+  ListOrdered,
+  Loader2,
+  Quote,
+  X,
+} from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -9,8 +20,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
+import { readNdjsonStream } from "@/lib/client/read-ndjson-stream";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024;
 
@@ -36,6 +49,264 @@ function isValidFile(file: File) {
   return validExtension && validMime && file.size <= MAX_FILE_SIZE;
 }
 
+type FormatAction =
+  | "bold"
+  | "heading"
+  | "unordered-list"
+  | "ordered-list"
+  | "quote";
+
+type StructuredTextareaProps = {
+  id: string;
+  name: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  maxLength?: number;
+  helperText?: string;
+  rows?: number;
+  onChange: (value: string) => void;
+};
+
+type AnalyzeStreamEvent =
+  | {
+      type: "progress";
+      progress: number;
+      stage: string;
+      message: string;
+    }
+  | {
+      type: "done";
+      progress: number;
+      reviewId: string;
+    }
+  | {
+      type: "error";
+      progress: number;
+      status: number;
+      message: string;
+      retryAfterSeconds?: number;
+    };
+
+function applyPrefixPerLine(
+  input: string,
+  selectionStart: number,
+  selectionEnd: number,
+  prefixFactory: (index: number) => string,
+) {
+  const blockStart = input.lastIndexOf("\n", selectionStart - 1) + 1;
+  const blockEnd = input.indexOf("\n", selectionEnd);
+  const safeBlockEnd = blockEnd === -1 ? input.length : blockEnd;
+
+  const before = input.slice(0, blockStart);
+  const block = input.slice(blockStart, safeBlockEnd);
+  const after = input.slice(safeBlockEnd);
+
+  const formattedBlock = block
+    .split("\n")
+    .map((line, index) => {
+      const content = line.trim();
+      if (!content) return line;
+      return `${prefixFactory(index)}${content}`;
+    })
+    .join("\n");
+
+  const nextValue = `${before}${formattedBlock}${after}`;
+  return {
+    nextValue,
+    nextSelectionStart: blockStart,
+    nextSelectionEnd: blockStart + formattedBlock.length,
+  };
+}
+
+function applyInlineWrap(
+  input: string,
+  selectionStart: number,
+  selectionEnd: number,
+  token: string,
+) {
+  const selected = input.slice(selectionStart, selectionEnd);
+
+  if (!selected) {
+    const fallback = "teks";
+    const insertion = `${token}${fallback}${token}`;
+    const nextValue =
+      input.slice(0, selectionStart) + insertion + input.slice(selectionEnd);
+
+    return {
+      nextValue,
+      nextSelectionStart: selectionStart + token.length,
+      nextSelectionEnd: selectionStart + token.length + fallback.length,
+    };
+  }
+
+  const nextValue =
+    input.slice(0, selectionStart) +
+    `${token}${selected}${token}` +
+    input.slice(selectionEnd);
+
+  return {
+    nextValue,
+    nextSelectionStart: selectionStart + token.length,
+    nextSelectionEnd: selectionEnd + token.length,
+  };
+}
+
+function StructuredTextarea({
+  id,
+  name,
+  label,
+  placeholder,
+  value,
+  maxLength = 4000,
+  helperText,
+  rows = 6,
+  onChange,
+}: StructuredTextareaProps) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  function focusWithSelection(start: number, end: number) {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.focus();
+    window.requestAnimationFrame(() => {
+      el.setSelectionRange(start, end);
+    });
+  }
+
+  function handleFormat(action: FormatAction) {
+    const el = textareaRef.current;
+    if (!el) return;
+
+    const selectionStart = el.selectionStart ?? 0;
+    const selectionEnd = el.selectionEnd ?? selectionStart;
+    let result: {
+      nextValue: string;
+      nextSelectionStart: number;
+      nextSelectionEnd: number;
+    };
+
+    switch (action) {
+      case "bold":
+        result = applyInlineWrap(value, selectionStart, selectionEnd, "**");
+        break;
+      case "heading":
+        result = applyPrefixPerLine(
+          value,
+          selectionStart,
+          selectionEnd,
+          () => "## ",
+        );
+        break;
+      case "unordered-list":
+        result = applyPrefixPerLine(
+          value,
+          selectionStart,
+          selectionEnd,
+          () => "- ",
+        );
+        break;
+      case "ordered-list":
+        result = applyPrefixPerLine(
+          value,
+          selectionStart,
+          selectionEnd,
+          (index) => `${index + 1}. `,
+        );
+        break;
+      case "quote":
+        result = applyPrefixPerLine(
+          value,
+          selectionStart,
+          selectionEnd,
+          () => "> ",
+        );
+        break;
+      default:
+        return;
+    }
+
+    onChange(result.nextValue);
+    focusWithSelection(result.nextSelectionStart, result.nextSelectionEnd);
+  }
+
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor={id}>{label}</Label>
+
+      <div className="rounded-lg border border-slate-300 bg-white">
+        <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 p-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => handleFormat("bold")}
+            aria-label="Format bold"
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => handleFormat("heading")}
+            aria-label="Tambah heading"
+          >
+            <Heading2 className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => handleFormat("unordered-list")}
+            aria-label="Tambah bullet list"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => handleFormat("ordered-list")}
+            aria-label="Tambah numbered list"
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => handleFormat("quote")}
+            aria-label="Tambah quote"
+          >
+            <Quote className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Textarea
+          ref={textareaRef}
+          id={id}
+          name={name}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          maxLength={maxLength}
+          rows={rows}
+          placeholder={placeholder}
+          className="min-h-28 border-0 bg-transparent focus-visible:ring-0"
+        />
+      </div>
+
+      {helperText && (
+        <p className="text-xs leading-5 text-muted-foreground">{helperText}</p>
+      )}
+
+      <p className="text-right text-[11px] text-muted-foreground">
+        {value.length}/{maxLength}
+      </p>
+    </div>
+  );
+}
+
 export function ReviewForm() {
   const [file, setFile] = useState<File | null>(null);
   const [targetRole, setTargetRole] = useState("");
@@ -44,6 +315,8 @@ export function ReviewForm() {
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitProgress, setSubmitProgress] = useState(0);
+  const [submitProgressLabel, setSubmitProgressLabel] = useState("");
 
   const fileStatus = useMemo(() => {
     if (!file) return null;
@@ -118,6 +391,8 @@ export function ReviewForm() {
 
     setIsSubmitting(true);
     setError("");
+    setSubmitProgress(2);
+    setSubmitProgressLabel("Menyiapkan analisis CV.");
 
     try {
       const formData = new FormData();
@@ -126,14 +401,14 @@ export function ReviewForm() {
       formData.append("jobRequirement", jobRequirement.trim());
       formData.append("notes", notes.trim());
 
-      const response = await fetch("/api/cv/analyze", {
+      const response = await fetch("/api/cv/analyze?stream=1", {
         method: "POST",
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
+        const result = await response.json().catch(() => null);
+
         if (response.status === 403) {
           window.setTimeout(() => {
             window.location.reload();
@@ -143,7 +418,47 @@ export function ReviewForm() {
         throw new Error(result?.message || "Gagal menganalisis CV.");
       }
 
-      window.location.href = `/review/${result.reviewId}`;
+      let doneReviewId = "";
+      let streamError = "";
+      let streamErrorStatus = 0;
+
+      await readNdjsonStream<AnalyzeStreamEvent>(response, (event) => {
+        if (event.type === "progress") {
+          setSubmitProgress(Math.max(0, Math.min(100, event.progress)));
+          setSubmitProgressLabel(event.message);
+          return;
+        }
+
+        if (event.type === "done") {
+          doneReviewId = event.reviewId;
+          setSubmitProgress(100);
+          setSubmitProgressLabel("Analisis selesai.");
+          return;
+        }
+
+        streamError = event.message;
+        streamErrorStatus = event.status;
+        setSubmitProgress(Math.max(0, Math.min(100, event.progress || 100)));
+        setSubmitProgressLabel("Analisis berhenti.");
+      });
+
+      if (streamError) {
+        if (streamErrorStatus === 403) {
+          window.setTimeout(() => {
+            window.location.reload();
+          }, 800);
+        }
+
+        throw new Error(streamError);
+      }
+
+      if (!doneReviewId) {
+        throw new Error(
+          "Respons analisis tidak lengkap. Silakan coba analisis ulang.",
+        );
+      }
+
+      window.location.href = `/review/${doneReviewId}`;
     } catch (err) {
       const message =
         err instanceof Error
@@ -151,6 +466,8 @@ export function ReviewForm() {
           : "Terjadi kesalahan saat memproses CV.";
 
       setError(message);
+      setSubmitProgress(0);
+      setSubmitProgressLabel("");
     } finally {
       setIsSubmitting(false);
     }
@@ -267,43 +584,27 @@ export function ReviewForm() {
             </p>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="jobRequirement">
-              Requirement pekerjaan (opsional)
-            </Label>
-            <Textarea
-              id="jobRequirement"
-              name="jobRequirement"
-              value={jobRequirement}
-              onChange={(event) => setJobRequirement(event.target.value)}
-              maxLength={4000}
-              placeholder="Contoh: Wajib memahami React, TypeScript, REST API, testing, dan pengalaman minimal 2 tahun."
-              className="min-h-28 bg-white"
-            />
-            <p className="text-xs leading-5 text-muted-foreground">
-              Boleh isi ringkasan requirement dari lowongan kerja agar analisis
-              lebih akurat terhadap posisi yang dituju.
-            </p>
-            <p className="text-right text-[11px] text-muted-foreground">
-              {jobRequirement.length}/4000
-            </p>
-          </div>
+          <StructuredTextarea
+            id="jobRequirement"
+            name="jobRequirement"
+            label="Requirement pekerjaan (opsional)"
+            value={jobRequirement}
+            onChange={setJobRequirement}
+            placeholder="Contoh: Wajib memahami React, TypeScript, REST API, testing, dan pengalaman minimal 2 tahun."
+            helperText="Boleh isi ringkasan requirement dari lowongan kerja agar analisis lebih akurat terhadap posisi yang dituju."
+            rows={8}
+          />
 
-          <div className="grid gap-2">
-            <Label htmlFor="notes">Catatan tambahan</Label>
-            <Textarea
-              id="notes"
-              name="notes"
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              maxLength={4000}
-              placeholder="Opsional. Contoh: Saya fresh graduate, ingin apply role junior backend."
-              className="min-h-24 bg-white"
-            />
-            <p className="text-right text-[11px] text-muted-foreground">
-              {notes.length}/4000
-            </p>
-          </div>
+          <StructuredTextarea
+            id="notes"
+            name="notes"
+            label="Catatan tambahan"
+            value={notes}
+            onChange={setNotes}
+            placeholder="Opsional. Contoh: Saya fresh graduate, ingin apply role junior backend."
+            helperText="Gunakan bullet atau numbering untuk catatan penting agar konteks analisis lebih jelas."
+            rows={6}
+          />
 
           <div className="flex items-start gap-3 rounded-lg border bg-slate-50 p-4">
             <Checkbox
@@ -343,6 +644,20 @@ export function ReviewForm() {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
+          )}
+
+          {isSubmitting && (
+            <div className="rounded-lg border border-primary/25 bg-primary/5 p-3">
+              <div className="mb-2 flex items-center justify-between text-xs">
+                <span className="font-medium text-slate-700">
+                  {submitProgressLabel || "Memproses analisis"}
+                </span>
+                <span className="font-semibold text-primary">
+                  {submitProgress}%
+                </span>
+              </div>
+              <Progress value={submitProgress} className="h-2" />
+            </div>
           )}
 
           <Button

@@ -1,0 +1,1 @@
+ALTER TABLE "cv_reviews" ADD COLUMN "cv_source_masked_text" text;

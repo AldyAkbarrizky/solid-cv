@@ -18,6 +18,7 @@ export const cvReviews = pgTable(
 
     targetRole: varchar("target_role", { length: 120 }).notNull(),
     jobRequirement: text("job_requirement"),
+    cvSourceMaskedText: text("cv_source_masked_text"),
 
     overallScore: integer("overall_score").notNull(),
 

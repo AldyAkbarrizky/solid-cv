@@ -23,6 +23,7 @@ import { DeleteReviewButton } from "./delete-review-button";
 import { getCurrentUser } from "@/lib/session";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ReviewResultActions } from "./review-result-actions";
+import { AtsCvDownloadButton } from "./ats-cv-download-button";
 
 type ReviewResultPageProps = {
   params: Promise<{
@@ -298,6 +299,29 @@ export default async function ReviewResultPage({
                 <DeleteReviewButton reviewId={review.id} />
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-lg border border-emerald-400/35 bg-emerald-500/10 p-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold text-emerald-700">
+                Unduh CV ATS versi rapi
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Buat versi CV ATS berdasarkan data CV asli dan feedback review
+                ini. Sistem tidak menambahkan pengalaman, skill, atau angka baru.
+              </p>
+            </div>
+            <AtsCvDownloadButton
+              reviewId={review.id}
+              targetRole={review.targetRole}
+              disabledReason={
+                review.cvSourceMaskedText
+                  ? undefined
+                  : "Review lama belum memiliki data sumber CV. Silakan review ulang CV terbaru."
+              }
+            />
           </div>
         </div>
 

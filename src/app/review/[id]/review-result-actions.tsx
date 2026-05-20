@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, ChevronDown, Copy, Download, FileText, Share2 } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronDown,
+  Copy,
+  Download,
+  FileText,
+  Share2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
