@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import {
   AlertTriangle,
-  BarChart3,
   CalendarDays,
   CheckCircle2,
   Clock3,
@@ -285,6 +284,7 @@ export default async function ReviewResultPage({
           <div className="w-full sm:w-auto">
             <ReviewResultActions
               targetRole={review.targetRole}
+              jobRequirementSummary={result.jobRequirementSummary}
               overallScore={result.overallScore}
               summary={result.summary}
               strengths={result.strengths}
@@ -367,6 +367,17 @@ export default async function ReviewResultPage({
                   {result.summary}
                 </p>
 
+                {(result.jobRequirementSummary || review.jobRequirement) && (
+                  <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      Requirement pekerjaan
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">
+                      {result.jobRequirementSummary || review.jobRequirement}
+                    </p>
+                  </div>
+                )}
+
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {lowestSectionScores.map((section) => (
                     <div
@@ -393,21 +404,11 @@ export default async function ReviewResultPage({
                   ))}
                 </div>
 
-                <div className="mt-6 grid gap-3 border-t pt-5 text-sm text-muted-foreground sm:grid-cols-3">
+                <div className="mt-6 grid gap-3 border-t pt-5 text-sm text-muted-foreground sm:grid-cols-1">
                   <div className="flex min-w-0 items-center gap-2">
                     <CalendarDays className="h-4 w-4 text-primary" />
                     <span className="truncate">
                       Dibuat {formatDateTime(review.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex min-w-0 items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-primary" />
-                    <span className="truncate">{review.aiProvider}</span>
-                  </div>
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Target className="h-4 w-4 text-primary" />
-                    <span className="truncate" title={review.aiModel}>
-                      {review.aiModel}
                     </span>
                   </div>
                 </div>

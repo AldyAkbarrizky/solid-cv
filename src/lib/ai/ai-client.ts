@@ -13,6 +13,7 @@ type AIProvider = "groq";
 type GenerateCVReviewParams = {
   cvText: string;
   targetRole: string;
+  jobRequirement?: string;
   notes?: string;
 };
 

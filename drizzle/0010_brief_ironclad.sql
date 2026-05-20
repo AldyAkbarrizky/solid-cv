@@ -1,0 +1,1 @@
+ALTER TABLE "cv_reviews" ADD COLUMN "job_requirement" text;

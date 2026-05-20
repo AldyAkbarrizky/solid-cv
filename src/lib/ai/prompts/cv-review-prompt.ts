@@ -1,5 +1,6 @@
 type BuildCVReviewPromptParams = {
   targetRole: string;
+  jobRequirement?: string;
   notes?: string;
   cvText: string;
 };
@@ -24,6 +25,7 @@ Struktur JSON wajib:
 {
   "overallScore": number,
   "summary": string,
+  "jobRequirementSummary": string,
   "strengths": string[],
   "weaknesses": string[],
   "sectionScores": {
@@ -54,6 +56,9 @@ Panduan penilaian:
 - Berikan rekomendasi yang praktis dan bisa langsung dikerjakan.
 - nextActions wajib 4-6 item, urut dari dampak tertinggi ke terendah.
 - Setiap item nextActions harus kalimat aksi yang singkat (maksimal 120 karakter), spesifik, dan bisa langsung dilakukan.
+- jobRequirementSummary wajib berbahasa Indonesia.
+- Jika requirement pekerjaan diisi, ringkas inti requirement dalam 3-5 kalimat padat.
+- Jika requirement pekerjaan kosong, isi jobRequirementSummary dengan "-".
 - Contoh format nextActions yang benar:
   [
     "Susun ulang pengalaman kerja dari posisi terbaru ke terlama.",
@@ -65,12 +70,16 @@ Panduan penilaian:
 
 export function buildCVReviewUserPrompt({
   targetRole,
+  jobRequirement,
   notes,
   cvText,
 }: BuildCVReviewPromptParams) {
   return `
 Target posisi:
 ${targetRole}
+
+Requirement pekerjaan (opsional):
+${jobRequirement || "-"}
 
 Catatan tambahan dari pengguna:
 ${notes || "-"}
@@ -80,6 +89,8 @@ ${cvText}
 
 Tugas:
 Analisis CV di atas untuk target posisi tersebut. Fokus pada struktur, kejelasan pengalaman, relevansi skill, keterbacaan ATS, dan kekuatan pencapaian.
+Jika requirement pekerjaan tersedia, gunakan sebagai acuan tambahan saat menilai relevansi skill, kata kunci, dan rekomendasi.
+Selalu isi field jobRequirementSummary dalam Bahasa Indonesia.
 Pastikan nextActions berupa beberapa item terpisah (bukan satu string panjang bernomor).
 `.trim();
 }

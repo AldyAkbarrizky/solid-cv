@@ -7,6 +7,7 @@ export type ReviewExportRecommendation = {
 
 export type ReviewExportPayload = {
   targetRole: string;
+  jobRequirementSummary?: string | null;
   overallScore: number;
   summary: string;
   strengths: string[];
@@ -175,6 +176,15 @@ export function buildReviewPdfHtml(payload: ReviewExportPayload) {
         <h2>Ringkasan</h2>
         <p>${escapeHtml(payload.summary)}</p>
       </section>
+
+      ${
+        payload.jobRequirementSummary
+          ? `<section class="section-block panel">
+        <h2>Requirement pekerjaan</h2>
+        <p>${escapeHtml(payload.jobRequirementSummary)}</p>
+      </section>`
+          : ""
+      }
 
       <section class="section-block grid">
         <div class="panel">

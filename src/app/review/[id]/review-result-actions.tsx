@@ -13,6 +13,7 @@ import {
 
 type ReviewResultActionsProps = {
   targetRole: string;
+  jobRequirementSummary?: string | null;
   overallScore: number;
   summary: string;
   strengths: string[];
@@ -37,6 +38,7 @@ function sanitizeFilename(value: string) {
 
 function buildMarkdown({
   targetRole,
+  jobRequirementSummary,
   overallScore,
   summary,
   strengths,
@@ -60,6 +62,8 @@ function buildMarkdown({
   return `# Review CV untuk ${targetRole}
 
 Skor CV: ${overallScore}/100
+
+${jobRequirementSummary ? `## Requirement pekerjaan\n\n${jobRequirementSummary}\n\n` : ""}
 
 ## Ringkasan
 
@@ -95,6 +99,7 @@ export function ReviewResultActions(props: ReviewResultActionsProps) {
   const exportPayload = useMemo<ReviewExportPayload>(
     () => ({
       targetRole: props.targetRole,
+      jobRequirementSummary: props.jobRequirementSummary,
       overallScore: props.overallScore,
       summary: props.summary,
       strengths: props.strengths,
@@ -109,6 +114,7 @@ export function ReviewResultActions(props: ReviewResultActionsProps) {
       props.strengths,
       props.summary,
       props.targetRole,
+      props.jobRequirementSummary,
       props.weaknesses,
     ],
   );

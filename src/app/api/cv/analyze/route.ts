@@ -26,7 +26,8 @@ const MAX_EXTRACTED_TEXT_CHARS = 32_000;
 
 const analyzeRequestSchema = z.object({
   targetRole: z.string().trim().min(3).max(120),
-  notes: z.string().trim().max(500).optional().default(""),
+  jobRequirement: z.string().trim().max(4000).optional().default(""),
+  notes: z.string().trim().max(4000).optional().default(""),
 });
 
 function getFileExtension(filename: string) {
@@ -111,18 +112,50 @@ export async function POST(request: Request) {
 
     const cvEntry = formData.get("cv");
     const targetRole = formData.get("targetRole");
+    const jobRequirement = formData.get("jobRequirement") ?? "";
     const notes = formData.get("notes") ?? "";
 
     const parsedInput = analyzeRequestSchema.safeParse({
       targetRole,
+      jobRequirement,
       notes,
     });
 
     if (!parsedInput.success) {
+      const fieldErrors = parsedInput.error.flatten().fieldErrors;
+
+      if (fieldErrors.targetRole?.length) {
+        return NextResponse.json(
+          {
+            message:
+              "Posisi tujuan tidak valid. Isi minimal 3 karakter dan maksimal 120 karakter.",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (fieldErrors.jobRequirement?.length) {
+        return NextResponse.json(
+          {
+            message:
+              "Requirement pekerjaan terlalu panjang. Maksimal 4000 karakter.",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (fieldErrors.notes?.length) {
+        return NextResponse.json(
+          {
+            message: "Catatan tambahan terlalu panjang. Maksimal 4000 karakter.",
+          },
+          { status: 400 },
+        );
+      }
+
       return NextResponse.json(
         {
-          message:
-            "Input tidak valid. Pastikan posisi tujuan terisi dengan benar.",
+          message: "Input tidak valid. Periksa kembali data yang Anda isi.",
         },
         { status: 400 },
       );
@@ -220,6 +253,7 @@ export async function POST(request: Request) {
     const aiResponse = await generateCVReview({
       cvText: maskedText,
       targetRole: parsedInput.data.targetRole,
+      jobRequirement: parsedInput.data.jobRequirement,
       notes: parsedInput.data.notes,
     });
 
@@ -228,6 +262,7 @@ export async function POST(request: Request) {
       .values({
         userId: currentUser?.id ?? null,
         targetRole: parsedInput.data.targetRole,
+        jobRequirement: parsedInput.data.jobRequirement || null,
         overallScore: aiResponse.result.overallScore,
         resultJson: aiResponse.result,
         aiProvider: aiResponse.provider,

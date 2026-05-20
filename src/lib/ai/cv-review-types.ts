@@ -3,6 +3,10 @@ import { z } from "zod";
 export const CVReviewResultSchema = z.object({
   overallScore: z.number().min(0).max(100),
   summary: z.string().min(1),
+  jobRequirementSummary: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ""),
   strengths: z.array(z.string()).default([]),
   weaknesses: z.array(z.string()).default([]),
   sectionScores: z.object({

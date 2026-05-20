@@ -39,6 +39,7 @@ function isValidFile(file: File) {
 export function ReviewForm() {
   const [file, setFile] = useState<File | null>(null);
   const [targetRole, setTargetRole] = useState("");
+  const [jobRequirement, setJobRequirement] = useState("");
   const [notes, setNotes] = useState("");
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
@@ -122,6 +123,7 @@ export function ReviewForm() {
       const formData = new FormData();
       formData.append("cv", file);
       formData.append("targetRole", targetRole.trim());
+      formData.append("jobRequirement", jobRequirement.trim());
       formData.append("notes", notes.trim());
 
       const response = await fetch("/api/cv/analyze", {
@@ -266,15 +268,41 @@ export function ReviewForm() {
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="jobRequirement">
+              Requirement pekerjaan (opsional)
+            </Label>
+            <Textarea
+              id="jobRequirement"
+              name="jobRequirement"
+              value={jobRequirement}
+              onChange={(event) => setJobRequirement(event.target.value)}
+              maxLength={4000}
+              placeholder="Contoh: Wajib memahami React, TypeScript, REST API, testing, dan pengalaman minimal 2 tahun."
+              className="min-h-28 bg-white"
+            />
+            <p className="text-xs leading-5 text-muted-foreground">
+              Boleh isi ringkasan requirement dari lowongan kerja agar analisis
+              lebih akurat terhadap posisi yang dituju.
+            </p>
+            <p className="text-right text-[11px] text-muted-foreground">
+              {jobRequirement.length}/4000
+            </p>
+          </div>
+
+          <div className="grid gap-2">
             <Label htmlFor="notes">Catatan tambahan</Label>
             <Textarea
               id="notes"
               name="notes"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
+              maxLength={4000}
               placeholder="Opsional. Contoh: Saya fresh graduate, ingin apply role junior backend."
               className="min-h-24 bg-white"
             />
+            <p className="text-right text-[11px] text-muted-foreground">
+              {notes.length}/4000
+            </p>
           </div>
 
           <div className="flex items-start gap-3 rounded-lg border bg-slate-50 p-4">

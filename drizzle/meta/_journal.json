@@ -71,6 +71,13 @@
       "when": 1779187600000,
       "tag": "0009_mighty_shadow_king",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1779249033119,
+      "tag": "0010_brief_ironclad",
+      "breakpoints": true
     }
   ]
 }
