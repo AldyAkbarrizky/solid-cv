@@ -282,7 +282,7 @@ export default async function ReviewResultPage({
             </h1>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="w-full sm:w-auto">
             <ReviewResultActions
               targetRole={review.targetRole}
               overallScore={result.overallScore}
@@ -291,8 +291,13 @@ export default async function ReviewResultPage({
               weaknesses={result.weaknesses}
               recommendations={result.recommendations}
               nextActions={result.nextActions}
+              className="sm:justify-end"
             />
-            {canDelete && <DeleteReviewButton reviewId={review.id} />}
+            {canDelete && (
+              <div className="mt-2 flex sm:justify-end">
+                <DeleteReviewButton reviewId={review.id} />
+              </div>
+            )}
           </div>
         </div>
 
