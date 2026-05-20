@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
 
+import { CredentialLoginForm } from "./credential-login-form";
 import { GoogleLoginButton } from "./google-login-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Metadata } from "next";
@@ -53,12 +54,22 @@ export default async function LoginPage() {
               Simpan riwayat review dan kuota penggunaan.
             </h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Gunakan akun Google untuk menyimpan riwayat review dan mengelola
-              kuota penggunaan.
+              Masuk dengan Google atau akun email yang sudah disediakan untuk
+              akses reviewer.
             </p>
           </div>
 
           <div className="mt-6">
+            <CredentialLoginForm />
+          </div>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <p className="text-xs text-muted-foreground">atau</p>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <div>
             <GoogleLoginButton />
           </div>
 
